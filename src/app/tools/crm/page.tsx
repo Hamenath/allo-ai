@@ -300,7 +300,7 @@ export default function CRMPage() {
                         <p className="text-xs text-muted-foreground">{client.company}</p>
                       </td>
                       <td className="px-6 py-4">
-                        <p className="truncate max-w-[200px]">{client.email}</p>
+                        <p className="truncate max-w-50">{client.email}</p>
                         <p className="text-xs text-muted-foreground">{client.phone}</p>
                       </td>
                       <td className="px-6 py-4">
@@ -329,7 +329,7 @@ export default function CRMPage() {
                             <DropdownMenuItem onClick={() => updateStatus(client.id!, "Won")}>
                               <TrendingUp className="mr-2 h-4 w-4" /> Mark Won
                             </DropdownMenuItem>
-                            <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => handleDelete(client.id!)}>
+                            <DropdownMenuItem className="text-destructive focus:bg-destructive/10" onClick={() => handleDelete(client.id!)}>
                               <Trash2 className="mr-2 h-4 w-4" /> Delete Client
                             </DropdownMenuItem>
                           </DropdownMenuContent>

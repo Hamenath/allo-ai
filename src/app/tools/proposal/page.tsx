@@ -247,23 +247,23 @@ ${result.nextSteps}
               <CardContent className="pt-6 flex-1 overflow-auto space-y-8">
                 
                 <div>
-                  <h3 className="text-lg font-semibold mb-2 text-primary uppercase text-sm tracking-wider">Executive Summary</h3>
+                  <h3 className="font-semibold mb-2 text-primary uppercase text-sm tracking-wider">Executive Summary</h3>
                   <p className="text-muted-foreground leading-relaxed text-sm whitespace-pre-wrap">{result.executiveSummary}</p>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                   <div>
-                    <h3 className="text-lg font-semibold mb-2 text-primary uppercase text-sm tracking-wider">The Problem</h3>
+                    <h3 className="font-semibold mb-2 text-primary uppercase text-sm tracking-wider">The Problem</h3>
                     <p className="text-muted-foreground leading-relaxed text-sm whitespace-pre-wrap">{result.clientProblem}</p>
                   </div>
                   <div>
-                    <h3 className="text-lg font-semibold mb-2 text-primary uppercase text-sm tracking-wider">Proposed Solution</h3>
+                    <h3 className="font-semibold mb-2 text-primary uppercase text-sm tracking-wider">Proposed Solution</h3>
                     <p className="text-muted-foreground leading-relaxed text-sm whitespace-pre-wrap">{result.proposedSolution}</p>
                   </div>
                 </div>
 
                 <div>
-                  <h3 className="text-lg font-semibold mb-3 text-primary uppercase text-sm tracking-wider flex items-center"><CheckCircle2 className="mr-2 h-4 w-4" /> Scope & Deliverables</h3>
+                  <h3 className="font-semibold mb-3 text-primary uppercase text-sm tracking-wider flex items-center"><CheckCircle2 className="mr-2 h-4 w-4" /> Scope & Deliverables</h3>
                   <ul className="space-y-2 text-sm text-muted-foreground mb-4">
                     {result.scope.map((item: string, i: number) => (
                       <li key={i} className="flex items-start"><span className="mr-2 mt-1 block h-1.5 w-1.5 shrink-0 rounded-full bg-primary"></span>{item}</li>
@@ -280,7 +280,7 @@ ${result.nextSteps}
                 </div>
 
                 <div>
-                  <h3 className="text-lg font-semibold mb-3 text-primary uppercase text-sm tracking-wider">Timeline</h3>
+                  <h3 className="font-semibold mb-3 text-primary uppercase text-sm tracking-wider">Timeline</h3>
                   <div className="space-y-3">
                     {result.timeline.map((t: any, i: number) => (
                       <div key={i} className="flex gap-4 p-3 border rounded-lg">
@@ -295,7 +295,7 @@ ${result.nextSteps}
                 </div>
                 
                 <div>
-                  <h3 className="text-lg font-semibold mb-3 text-primary uppercase text-sm tracking-wider">Pricing</h3>
+                  <h3 className="font-semibold mb-3 text-primary uppercase text-sm tracking-wider">Pricing</h3>
                   <div className="space-y-2">
                     {result.pricing.map((p: any, i: number) => (
                       <div key={i} className="flex justify-between p-3 border-b border-dashed">
@@ -307,7 +307,7 @@ ${result.nextSteps}
                 </div>
 
                 <div>
-                  <h3 className="text-lg font-semibold mb-2 text-primary uppercase text-sm tracking-wider">Terms & Next Steps</h3>
+                  <h3 className="font-semibold mb-2 text-primary uppercase text-sm tracking-wider">Terms & Next Steps</h3>
                   <ul className="space-y-1 text-sm text-muted-foreground mb-4">
                     {result.terms.map((item: string, i: number) => (
                       <li key={i}>- {item}</li>

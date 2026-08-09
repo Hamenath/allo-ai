@@ -208,7 +208,7 @@ export default function StartupValidatorPage() {
                       <p className="text-muted-foreground text-sm leading-relaxed">{result.summary}</p>
                     </div>
                     
-                    <div className="flex flex-col items-center justify-center bg-muted/50 p-6 rounded-xl border border-border/50 min-w-[200px]">
+                    <div className="flex flex-col items-center justify-center bg-muted/50 p-6 rounded-xl border border-border/50 min-w-50">
                       <span className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-2">Viability Score</span>
                       <div className={`text-6xl font-black ${getScoreColor(result.overallScore)}`}>
                         {result.overallScore}
@@ -289,7 +289,7 @@ export default function StartupValidatorPage() {
                   <CardHeader className="pb-2"><CardTitle className="text-sm text-muted-foreground uppercase tracking-wider">Business Model Ideas</CardTitle></CardHeader>
                   <CardContent>
                     <ul className="space-y-2 text-sm">
-                      {result.businessModelSuggestions.map((item: string, i: number) => <li key={i} className="border-b border-border/50 pb-2 last:border-0 last:pb-0">- {item}</li>)}
+                      {result.businessModelSuggestions.map((item: string, i: number) => <li key={i} className="border-b border-border/50 pb-2 last:border-0">- {item}</li>)}
                     </ul>
                   </CardContent>
                 </Card>
@@ -297,7 +297,7 @@ export default function StartupValidatorPage() {
                   <CardHeader className="pb-2"><CardTitle className="text-sm text-muted-foreground uppercase tracking-wider">Go-to-Market Ideas</CardTitle></CardHeader>
                   <CardContent>
                     <ul className="space-y-2 text-sm">
-                      {result.goToMarketIdeas.map((item: string, i: number) => <li key={i} className="border-b border-border/50 pb-2 last:border-0 last:pb-0">- {item}</li>)}
+                      {result.goToMarketIdeas.map((item: string, i: number) => <li key={i} className="border-b border-border/50 pb-2 last:border-0">- {item}</li>)}
                     </ul>
                   </CardContent>
                 </Card>
