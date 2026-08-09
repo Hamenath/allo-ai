@@ -112,7 +112,10 @@ export default function AppLayout({
 }) {
   return (
     <ProtectedRoute>
-      <div className="flex min-h-screen bg-muted/10">
+      <head>
+        <meta name="robots" content="noindex, nofollow" />
+      </head>
+      <div className="flex min-h-screen bg-background">
         <CommandPalette />
         {/* Desktop Sidebar */}
         <aside className="hidden w-64 flex-col border-r bg-background md:flex fixed inset-y-0 z-20">

@@ -169,6 +169,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   return (
     <div className="flex min-h-screen bg-slate-950 text-slate-100">
+      <head>
+        <meta name="robots" content="noindex, nofollow" />
+      </head>
       {/* Desktop Sidebar */}
       <aside className="hidden w-64 flex-col border-r border-slate-800 bg-slate-950 md:flex fixed inset-y-0 z-30">
         <AdminSidebarContent />
