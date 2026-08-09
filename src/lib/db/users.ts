@@ -52,11 +52,28 @@ export async function syncUserProfile(user: any) {
   return userSnap.data() as UserProfile;
 }
 
-export async function updateUserProfile(uid: string, data: Partial<UserProfile>) {
-  if (!db) return;
-  const userRef = doc(db, "users", uid);
-  await updateDoc(userRef, {
-    ...data,
-    updatedAt: serverTimestamp(),
-  });
+
+// Only these fields may be updated by client-side operations via this helper.
+// Plan, role, subscriptionStatus, and other trusted fields are EXCLUDED — they are
+// written exclusively by the Admin SDK on the server.
+export interface SafeUserProfileUpdate {
+  name?: string | null;
+  photoURL?: string | null;
+  preferences?: {
+    theme?: string;
+    notifications?: boolean;
+  };
 }
+
+export async function updateUserProfile(uid: string, data: SafeUserProfileUpdate) {
+  if (!db) return;
+  // Build update with only safe fields — never spread unknown data
+  const safeUpdate: Record<string, any> = { updatedAt: serverTimestamp() };
+  if (data.name !== undefined) safeUpdate.name = data.name;
+  if (data.photoURL !== undefined) safeUpdate.photoURL = data.photoURL;
+  if (data.preferences !== undefined) safeUpdate.preferences = data.preferences;
+
+  const userRef = doc(db, "users", uid);
+  await updateDoc(userRef, safeUpdate);
+}
+

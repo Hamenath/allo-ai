@@ -7,11 +7,21 @@ import {
   savePaymentHistoryRecord 
 } from "@/lib/db/subscriptions";
 import { PlanType } from "@/lib/billing/plans";
+import { checkRateLimit, rateLimitedResponse } from "@/lib/security/rate-limit";
 
 export async function POST(req: Request) {
   try {
+    // 0. Rate limit webhook endpoint: 60 requests/min (generous for Razorpay retries)
+    const forwardedFor = req.headers.get("x-forwarded-for") || "unknown";
+    const ipKey = `webhook_rp_${forwardedFor.split(",")[0].trim()}`;
+    const rlCheck = await checkRateLimit(ipKey, { limit: 60, windowMs: 60 * 1000 });
+    if (!rlCheck.allowed) {
+      return rateLimitedResponse(rlCheck.retryAfter, "Webhook rate limit exceeded.");
+    }
+
     const rawBody = await req.text();
     const signature = req.headers.get("x-razorpay-signature");
+
 
     if (!signature) {
       return NextResponse.json(
