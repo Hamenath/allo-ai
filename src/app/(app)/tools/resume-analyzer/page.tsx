@@ -137,6 +137,12 @@ export default function ResumeAnalyzerPage() {
                   )}
                 </div>
 
+                <div className="sr-only" aria-live="polite" aria-atomic="true">
+                  {isGenerating && "Generating your result..."}
+                  {result && !isGenerating && "Generation complete."}
+                  {error && !isGenerating && "Generation failed."}
+                </div>
+
                 <Button type="submit" className="w-full" disabled={isGenerating}>
                   {isGenerating ? (
                     <>
