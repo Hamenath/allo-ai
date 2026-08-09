@@ -33,10 +33,13 @@ export function DocumentWorkspace({ title, description, onlyFavorites = false }:
 
   const pageSize = 12;
 
+  const [errorState, setErrorState] = useState<string | null>(null);
+
   const loadDocuments = async (isInitial = true) => {
     if (!user) return;
     if (isInitial) {
       setLoading(true);
+      setErrorState(null);
       setHasMore(true);
       setGenerations([]);
       setLastDoc(null);
@@ -60,6 +63,7 @@ export function DocumentWorkspace({ title, description, onlyFavorites = false }:
       setGenerations(prev => isInitial ? docs : [...prev, ...docs]);
     } catch (error) {
       console.error("Failed to load documents", error);
+      setErrorState("Couldn't load documents. Please check your network or try again.");
     } finally {
       setLoading(false);
       setLoadingMore(false);
@@ -162,6 +166,19 @@ export function DocumentWorkspace({ title, description, onlyFavorites = false }:
         <div className="flex h-[40vh] items-center justify-center">
           <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
         </div>
+      ) : errorState ? (
+        <Card className="flex flex-col items-center justify-center border-destructive/20 bg-destructive/5 p-12 text-center h-[40vh]">
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-destructive/10 text-destructive">
+            <FileText className="h-8 w-8" />
+          </div>
+          <h2 className="text-xl font-semibold text-destructive">{errorState}</h2>
+          <p className="text-muted-foreground mt-2 mb-4 text-sm">
+            We encountered a problem fetching your documents.
+          </p>
+          <Button variant="outline" onClick={() => loadDocuments(true)}>
+            Try Again
+          </Button>
+        </Card>
       ) : generations.length === 0 ? (
         <Card className="flex flex-col items-center justify-center border-dashed p-12 text-center h-[40vh]">
           <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">

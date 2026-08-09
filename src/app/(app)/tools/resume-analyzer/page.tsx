@@ -158,9 +158,20 @@ export default function ResumeAnalyzerPage() {
                 </Button>
                 
                 {error && (
-                  <div className="mt-4 flex items-center space-x-2 rounded-md bg-destructive/10 p-3 text-sm text-destructive">
-                    <AlertCircle className="h-4 w-4" />
-                    <span>{error}</span>
+                  <div className={`mt-4 rounded-xl p-4 text-sm ${error.includes("limit") ? "bg-amber-500/10 border border-amber-500/30 text-amber-500" : "bg-destructive/10 text-destructive"}`}>
+                    <div className="flex items-start space-x-3">
+                      <AlertCircle className="h-5 w-5 shrink-0 mt-0.5" />
+                      <div className="space-y-2">
+                        <p className="font-medium">{error}</p>
+                        {error.includes("limit") && (
+                          <Link href="/billing" className="inline-block pt-1">
+                            <Button size="sm" className="bg-amber-600 hover:bg-amber-500 text-white font-semibold h-8 text-xs">
+                              Upgrade Plan
+                            </Button>
+                          </Link>
+                        )}
+                      </div>
+                    </div>
                   </div>
                 )}
               </form>
