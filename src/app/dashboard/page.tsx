@@ -16,6 +16,12 @@ const tools = [
   { id: "cold-email", name: "Cold Email Generator", category: "Career", icon: FileText, color: "text-amber-500", bg: "bg-amber-500/10", desc: "Generate high-converting cold outreach emails." },
   { id: "linkedin", name: "LinkedIn Post Generator", category: "Career", icon: Sparkles, color: "text-sky-500", bg: "bg-sky-500/10", desc: "Generate highly engaging LinkedIn posts and updates." },
   { id: "study-planner", name: "Study Planner", category: "Career", icon: Code, color: "text-emerald-500", bg: "bg-emerald-500/10", desc: "Create personalized study plans and schedules." },
+  { id: "invoice", name: "Invoice Generator", category: "Business", icon: FileText, color: "text-emerald-500", bg: "bg-emerald-500/10", desc: "Create and manage professional invoices." },
+  { id: "job-description", name: "Job Description Generator", category: "Business", icon: Briefcase, color: "text-indigo-500", bg: "bg-indigo-500/10", desc: "Write clear, inclusive job descriptions." },
+  { id: "crm", name: "Freelancer CRM", category: "Business", icon: Sparkles, color: "text-blue-500", bg: "bg-blue-500/10", desc: "Manage clients, leads, and your deal pipeline." },
+  { id: "proposal", name: "Proposal Generator", category: "Business", icon: FileText, color: "text-amber-500", bg: "bg-amber-500/10", desc: "Draft structured and persuasive client proposals." },
+  { id: "social-calendar", name: "Social Media Calendar", category: "Business", icon: Sparkles, color: "text-purple-500", bg: "bg-purple-500/10", desc: "Generate a month of tailored social media posts." },
+  { id: "startup-validator", name: "Startup Idea Validator", category: "Business", icon: Code, color: "text-rose-500", bg: "bg-rose-500/10", desc: "Get critical AI analysis on your startup idea." },
 ];
 
 export default function DashboardPage() {

@@ -274,6 +274,204 @@ Rules:
 `;
 
 // --------------------------------------------------------
+// 7. JOB DESCRIPTION GENERATOR
+// --------------------------------------------------------
+
+export const JobDescriptionInputSchema = z.object({
+  jobTitle: z.string().min(2).max(100),
+  department: z.string().max(100).optional(),
+  experienceLevel: z.string().max(50).optional(),
+  location: z.string().max(100).optional(),
+  employmentType: z.string().max(50).optional(),
+  skills: z.string().max(1000).optional(),
+  responsibilities: z.string().max(2000).optional(),
+  companyDescription: z.string().max(1000).optional(),
+  salary: z.string().max(100).optional(),
+});
+
+export const JobDescriptionOutputSchema = z.object({
+  jobSummary: z.string().describe("A brief, engaging overview of the role"),
+  responsibilities: z.array(z.string()).describe("List of key responsibilities"),
+  requiredQualifications: z.array(z.string()).describe("List of must-have qualifications"),
+  preferredQualifications: z.array(z.string()).describe("List of nice-to-have qualifications"),
+  skills: z.array(z.string()).describe("Key hard and soft skills required"),
+  benefits: z.array(z.string()).describe("List of benefits (only include if provided or standard generic ones)"),
+  applicationInstructions: z.string().describe("Brief instructions on how to apply"),
+});
+
+const JobDescriptionPrompt = (input: z.infer<typeof JobDescriptionInputSchema>) => `
+You are an expert HR professional and technical recruiter.
+Write a compelling, professional Job Description based on the following:
+
+Job Title: ${input.jobTitle}
+Department: ${input.department || "Not provided"}
+Experience Level: ${input.experienceLevel || "Not provided"}
+Location: ${input.location || "Not provided"}
+Employment Type: ${input.employmentType || "Not provided"}
+Skills Required: ${input.skills || "Not provided"}
+Responsibilities (Draft): ${input.responsibilities || "Not provided"}
+Company Description: ${input.companyDescription || "Not provided"}
+Salary: ${input.salary || "Not provided"}
+
+Rules:
+1. Do NOT invent company facts, specific salaries, or strict qualifications unless provided or heavily implied by the job title and experience level.
+2. Structure the output clearly according to the JSON schema.
+3. Keep the tone professional, inclusive, and encouraging.
+4. Return ONLY valid JSON matching the schema.
+`;
+
+// --------------------------------------------------------
+// 8. CLIENT PROPOSAL GENERATOR
+// --------------------------------------------------------
+
+export const ProposalInputSchema = z.object({
+  clientName: z.string().min(2).max(100),
+  company: z.string().max(100).optional(),
+  projectName: z.string().min(2).max(200),
+  projectRequirements: z.string().min(10).max(2000),
+  problem: z.string().max(1000).optional(),
+  proposedSolution: z.string().max(2000).optional(),
+  services: z.string().max(1000).optional(),
+  deliverables: z.string().max(1000).optional(),
+  timeline: z.string().max(500).optional(),
+  budget: z.string().max(500).optional(),
+  paymentTerms: z.string().max(500).optional(),
+});
+
+export const ProposalOutputSchema = z.object({
+  executiveSummary: z.string().describe("High-level summary of the proposal"),
+  clientProblem: z.string().describe("Detailed articulation of the client's problem/needs"),
+  proposedSolution: z.string().describe("How the proposed services solve the problem"),
+  scope: z.array(z.string()).describe("List of what is included in the project scope"),
+  deliverables: z.array(z.string()).describe("Specific, tangible deliverables"),
+  timeline: z.array(z.object({ phase: z.string(), duration: z.string(), description: z.string() })),
+  pricing: z.array(z.object({ item: z.string(), cost: z.string() })),
+  terms: z.array(z.string()).describe("List of terms and conditions or payment terms"),
+  nextSteps: z.string().describe("Call to action for the client"),
+});
+
+const ProposalPrompt = (input: z.infer<typeof ProposalInputSchema>) => `
+You are an expert B2B consultant and sales professional.
+Write a comprehensive, persuasive client proposal based on:
+
+Client Name: ${input.clientName}
+Company: ${input.company || "Not provided"}
+Project Name: ${input.projectName}
+Project Requirements: ${input.projectRequirements}
+Client Problem: ${input.problem || "Not provided"}
+Proposed Solution: ${input.proposedSolution || "Not provided"}
+Services Offered: ${input.services || "Not provided"}
+Deliverables: ${input.deliverables || "Not provided"}
+Timeline Details: ${input.timeline || "Not provided"}
+Budget/Pricing: ${input.budget || "Not provided"}
+Payment Terms: ${input.paymentTerms || "Not provided"}
+
+Rules:
+1. Do not invent client facts or scope that completely deviates from the input.
+2. If Timeline or Pricing is vague, generate a reasonable generic structure based on the project type, but note that it is an estimate.
+3. Make the language professional, authoritative, and persuasive.
+4. Return ONLY valid JSON matching the schema.
+`;
+
+// --------------------------------------------------------
+// 9. SOCIAL MEDIA CALENDAR
+// --------------------------------------------------------
+
+export const SocialCalendarInputSchema = z.object({
+  business: z.string().min(2).max(100),
+  industry: z.string().min(2).max(100),
+  audience: z.string().max(200).optional(),
+  platform: z.enum(["LinkedIn", "Instagram", "Facebook", "X/Twitter", "Mixed"]),
+  goal: z.string().min(2).max(200),
+  postingFrequency: z.string().max(100).optional(),
+  dateRange: z.string().max(100).optional(),
+  tone: z.string().max(100).optional(),
+});
+
+export const SocialCalendarOutputSchema = z.object({
+  strategySummary: z.string().describe("Brief overview of the content strategy"),
+  calendar: z.array(
+    z.object({
+      dayOrDate: z.string(),
+      platform: z.string(),
+      topic: z.string(),
+      contentType: z.string(),
+      hook: z.string(),
+      caption: z.string(),
+      cta: z.string(),
+      hashtags: z.array(z.string()),
+    })
+  ).describe("Array of individual social media posts"),
+});
+
+const SocialCalendarPrompt = (input: z.infer<typeof SocialCalendarInputSchema>) => `
+You are an expert Social Media Manager and Content Strategist.
+Create a detailed social media content calendar based on:
+
+Business/Brand: ${input.business}
+Industry: ${input.industry}
+Target Audience: ${input.audience || "Not provided"}
+Platform: ${input.platform}
+Primary Goal: ${input.goal}
+Frequency: ${input.postingFrequency || "3 times a week"}
+Date Range/Duration: ${input.dateRange || "1 Week"}
+Tone of Voice: ${input.tone || "Professional yet engaging"}
+
+Rules:
+1. Generate high-quality, engaging posts that align with the platform's best practices (e.g., short for X, visual/aesthetic for Instagram, professional for LinkedIn).
+2. Ensure a good mix of content types (e.g., educational, promotional, engaging).
+3. Do not claim guaranteed viral results in the output text.
+4. Generate enough posts to satisfy the frequency and duration. (Limit to max 14 posts).
+5. Return ONLY valid JSON matching the schema.
+`;
+
+// --------------------------------------------------------
+// 10. STARTUP IDEA VALIDATOR
+// --------------------------------------------------------
+
+export const StartupValidatorInputSchema = z.object({
+  idea: z.string().min(10).max(1000),
+  targetCustomer: z.string().min(2).max(500),
+  problem: z.string().min(10).max(1000),
+  proposedSolution: z.string().min(10).max(1000),
+  businessModel: z.string().max(500).optional(),
+  competitors: z.string().max(500).optional(),
+});
+
+export const StartupValidatorOutputSchema = z.object({
+  overallScore: z.number().min(0).max(100).describe("Overall viability score out of 100"),
+  summary: z.string().describe("Executive summary of the AI's analysis"),
+  problemStrength: z.object({ score: z.number().min(0).max(10), analysis: z.string() }),
+  customerClarity: z.object({ score: z.number().min(0).max(10), analysis: z.string() }),
+  valueProposition: z.object({ score: z.number().min(0).max(10), analysis: z.string() }),
+  competitionAnalysis: z.string().describe("Analysis of provided or inferred competitors"),
+  risks: z.array(z.string()).describe("Key risks and challenges"),
+  mvpFeatures: z.array(z.string()).describe("Recommended features for a Minimum Viable Product"),
+  businessModelSuggestions: z.array(z.string()),
+  goToMarketIdeas: z.array(z.string()),
+  validationQuestions: z.array(z.string()).describe("Questions the founder must answer or ask customers"),
+  nextSteps: z.array(z.string()),
+});
+
+const StartupValidatorPrompt = (input: z.infer<typeof StartupValidatorInputSchema>) => `
+You are an expert Startup Advisor, VC Analyst, and Product Manager.
+Evaluate and validate the following startup idea:
+
+Idea: ${input.idea}
+Target Customer: ${input.targetCustomer}
+Problem Being Solved: ${input.problem}
+Proposed Solution: ${input.proposedSolution}
+Business Model: ${input.businessModel || "Not provided"}
+Competitors: ${input.competitors || "None listed"}
+
+Rules:
+1. Provide a highly critical, realistic, and objective analysis.
+2. Clearly distinguish between your AI reasoning and verified external facts (do not fabricate market statistics; rely on general reasoning).
+3. Score the idea fairly. Do not give a 100/100 just to be nice. If it's highly saturated or has weak margins, score it lower.
+4. Return ONLY valid JSON matching the schema.
+`;
+
+// --------------------------------------------------------
 // REGISTRY EXPORT
 // --------------------------------------------------------
 
@@ -342,6 +540,50 @@ export const toolsRegistry: Record<string, AITool> = {
     inputSchema: StudyPlannerInputSchema,
     outputSchema: StudyPlannerOutputSchema,
     systemPrompt: StudyPlannerPrompt,
+    planRequirement: "FREE",
+  },
+  "job-description": {
+    id: "job-description",
+    name: "Job Description",
+    category: "BUSINESS",
+    description: "Generate professional job descriptions.",
+    icon: "BriefcaseBusiness",
+    inputSchema: JobDescriptionInputSchema,
+    outputSchema: JobDescriptionOutputSchema,
+    systemPrompt: JobDescriptionPrompt,
+    planRequirement: "FREE",
+  },
+  "proposal": {
+    id: "proposal",
+    name: "Proposal Generator",
+    category: "BUSINESS",
+    description: "Create persuasive client proposals and contracts.",
+    icon: "Handshake",
+    inputSchema: ProposalInputSchema,
+    outputSchema: ProposalOutputSchema,
+    systemPrompt: ProposalPrompt,
+    planRequirement: "FREE",
+  },
+  "social-calendar": {
+    id: "social-calendar",
+    name: "Social Calendar",
+    category: "BUSINESS",
+    description: "Generate structured social media content calendars.",
+    icon: "CalendarDays",
+    inputSchema: SocialCalendarInputSchema,
+    outputSchema: SocialCalendarOutputSchema,
+    systemPrompt: SocialCalendarPrompt,
+    planRequirement: "FREE",
+  },
+  "startup-validator": {
+    id: "startup-validator",
+    name: "Startup Validator",
+    category: "BUSINESS",
+    description: "Evaluate your startup idea with AI VC analysis.",
+    icon: "Rocket",
+    inputSchema: StartupValidatorInputSchema,
+    outputSchema: StartupValidatorOutputSchema,
+    systemPrompt: StartupValidatorPrompt,
     planRequirement: "FREE",
   },
 };
