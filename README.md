@@ -1,6 +1,4 @@
 <div align="center">
-  <img src="public/github-banner.png" alt="ALLO AI Workspace Banner" width="100%" />
-
   # ALLO — All-in-One AI Workspace 🚀
   
   **Everything you need. One place.**
@@ -41,10 +39,6 @@ Whether you are optimizing your career, analyzing a startup, writing code, or st
 <br/>
 
 ## 📸 Sneak Peek
-
-<div align="center">
-  <img src="public/github-banner.png" alt="Dashboard Preview" width="800" style="border-radius: 8px; box-shadow: 0 4px 14px 0 rgba(0,0,0,0.1);" />
-</div>
 
 <br/>
 
