@@ -1,36 +1,118 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+<div align="center">
+  <img src="public/github-banner.png" alt="ALLO AI Workspace Banner" width="100%" />
 
-## Getting Started
+  # ALLO — All-in-One AI Workspace 🚀
+  
+  **Everything you need. One place.**
+  
+  <p align="center">
+    <a href="https://nextjs.org/"><img src="https://img.shields.io/badge/Next.js-15-black?style=for-the-badge&logo=next.js" alt="Next.js" /></a>
+    <a href="https://tailwindcss.com/"><img src="https://img.shields.io/badge/Tailwind_CSS-v4-38B2AC?style=for-the-badge&logo=tailwind-css" alt="Tailwind CSS" /></a>
+    <a href="https://ui.shadcn.com/"><img src="https://img.shields.io/badge/shadcn/ui-black?style=for-the-badge&logo=shadcnui" alt="shadcn/ui" /></a>
+    <a href="https://firebase.google.com/"><img src="https://img.shields.io/badge/Firebase-Auth_&_Firestore-FFCA28?style=for-the-badge&logo=firebase" alt="Firebase" /></a>
+    <a href="https://ai.google.dev/"><img src="https://img.shields.io/badge/Google_Gemini-AI-4285F4?style=for-the-badge&logo=google" alt="Gemini" /></a>
+  </p>
+</div>
 
-First, run the development server:
+<br/>
 
+## 🌟 What is ALLO?
+
+**ALLO** is an all-in-one, production-grade AI workspace SaaS platform designed to eliminate tool fatigue. Instead of paying for 15 different disjointed apps for distinct micro-tasks, ALLO brings practical AI tools together in a single, coherent, premium interface.
+
+Whether you are optimizing your career, analyzing a startup, writing code, or studying for an exam, ALLO provides highly-tailored tools powered by the state-of-the-art **Google Gemini 2.5 Flash** model.
+
+## 🛠️ Features (Current Capabilities)
+
+### Career AI Suite
+- **📄 Resume Analyzer**: Get ATS scores, actionable feedback, and detailed improvement plans tailored to your specific target job.
+- **💼 Interview Generator**: Practice with dynamic, tailored interview questions categorized by difficulty and type (Technical, HR, Behavioral).
+- **✉️ Cold Email Generator**: Write high-converting, personalized cold outreach emails with variable lengths and follow-up templates.
+- **📝 Cover Letter Generator**: Instantly generate persuasive cover letters that perfectly align your existing resume with your target job description.
+- **💡 LinkedIn Post Generator**: Craft viral and professional updates to share your achievements, thoughts, or startup news.
+- **🎓 Study Planner**: Auto-generate a comprehensive study strategy, daily routine, topic breakdown, and milestone checklist to ace your next exam or certification.
+
+### 🧠 Core Architecture
+- **Unified AI Engine**: A robust backend provider utilizing Google Gemini's structured JSON schema generation.
+- **Tool Registry System**: Easily plug-and-play new AI tools by defining a single `Zod` schema and system prompt. 
+- **Favorites & History**: Fully integrated with Firebase Firestore to persist generation histories, allowing you to seamlessly revisit and favorite previous AI outputs.
+- **Secure Authentication**: Firebase Auth guards routes using a Higher-Order Component and validates API calls securely via Firebase Admin SDK.
+
+<br/>
+
+## 📸 Sneak Peek
+
+<div align="center">
+  <img src="public/github-banner.png" alt="Dashboard Preview" width="800" style="border-radius: 8px; box-shadow: 0 4px 14px 0 rgba(0,0,0,0.1);" />
+</div>
+
+<br/>
+
+## 🚀 Getting Started
+
+Follow these steps to run the ALLO workspace locally.
+
+### 1. Prerequisites
+- **Node.js** v18+
+- **npm** or **pnpm** or **yarn**
+- A **Firebase** Project (Auth + Firestore)
+- A **Google Gemini** API Key
+
+### 2. Clone the Repository
+```bash
+git clone https://github.com/Hamenath/allo-ai.git
+cd allo-ai
+```
+
+### 3. Install Dependencies
+```bash
+npm install
+# or
+yarn install
+```
+
+### 4. Environment Configuration
+Create a `.env.local` file in the root directory by copying the example file:
+```bash
+cp .env.example .env.local
+```
+Fill in the following variables with your own credentials:
+```env
+# Google Gemini API
+GEMINI_API_KEY="your-gemini-api-key"
+
+# Firebase Client (Public)
+NEXT_PUBLIC_FIREBASE_API_KEY="your-firebase-api-key"
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN="your-project.firebaseapp.com"
+NEXT_PUBLIC_FIREBASE_PROJECT_ID="your-project-id"
+
+# Firebase Admin (Private / Server-side)
+FIREBASE_ADMIN_PROJECT_ID="your-project-id"
+FIREBASE_ADMIN_CLIENT_EMAIL="firebase-adminsdk-xxx@your-project-id.iam.gserviceaccount.com"
+FIREBASE_ADMIN_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n"
+```
+
+### 5. Run the Development Server
 ```bash
 npm run dev
 # or
 yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+<br/>
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 🏗️ Tech Stack
+- **Framework**: [Next.js 15](https://nextjs.org/) (App Router, React Server Components)
+- **Styling**: [Tailwind CSS v4](https://tailwindcss.com/)
+- **UI Components**: [shadcn/ui](https://ui.shadcn.com/) (Radix UI)
+- **Authentication**: Firebase Authentication
+- **Database**: Firebase Firestore
+- **AI Models**: Google Gemini (`gemini-2.5-flash`) + `@google/genai`
+- **Validation**: Zod + React Hook Form
 
-## Learn More
+## 📜 License
+This project is open-source and available under the [MIT License](LICENSE).
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+<p align="center">Built with 💜 by the ALLO Team.</p>
