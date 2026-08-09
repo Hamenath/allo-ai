@@ -1,70 +1,151 @@
-import { adminDb } from "@/lib/firebase-admin";
+import { db } from "@/lib/firebase";
+import { doc, getDoc, setDoc, updateDoc, increment, serverTimestamp } from "firebase/firestore";
+import { getPlanConfig, PlanType } from "../billing/plans";
 
-const PLAN_LIMITS = {
-  FREE: 5,
-  PRO: 100,
-  BUSINESS: 500,
-};
+export interface UsageInfo {
+  plan: PlanType;
+  used: number;
+  limit: number;
+  remaining: number;
+  percentage: number;
+  resetAt: string;
+}
 
-export async function checkUsage(userId: string): Promise<{ allowed: boolean; remaining: number }> {
-  if (!adminDb) {
-    console.warn("adminDb not initialized, bypassing usage check");
-    return { allowed: true, remaining: 999 };
+export function getCurrentPeriodId(): string {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  return `${year}_${month}`;
+}
+
+export function getNextResetDate(): string {
+  const now = new Date();
+  const nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+  return nextMonth.toISOString();
+}
+
+/**
+ * Fetch the user's assigned plan from `users/{userId}` or default to FREE
+ */
+export async function getUserPlan(userId: string): Promise<PlanType> {
+  if (!db || !userId) return "FREE";
+  try {
+    const userRef = doc(db, "users", userId);
+    const userSnap = await getDoc(userRef);
+    if (userSnap.exists()) {
+      const data = userSnap.data();
+      if (data.plan) {
+        return data.plan.toUpperCase() as PlanType;
+      }
+    }
+  } catch (err) {
+    console.error("Error fetching user plan:", err);
+  }
+  return "FREE";
+}
+
+/**
+ * Get current monthly usage for a user
+ */
+export async function getUsage(userId: string): Promise<UsageInfo> {
+  const plan = await getUserPlan(userId);
+  const planConfig = getPlanConfig(plan);
+  const period = getCurrentPeriodId();
+  const resetAt = getNextResetDate();
+
+  let used = 0;
+
+  if (db && userId) {
+    try {
+      const usageDocId = `${userId}_${period}`;
+      const usageRef = doc(db, "usage", usageDocId);
+      const usageSnap = await getDoc(usageRef);
+
+      if (usageSnap.exists()) {
+        used = usageSnap.data().generationCount || 0;
+      }
+    } catch (err) {
+      console.error("Error reading usage doc:", err);
+    }
   }
 
-  const userRef = adminDb.collection("users").doc(userId);
-  const userSnap = await userRef.get();
+  const limit = planConfig.monthlyGenerations;
+  const remaining = Math.max(0, limit - used);
+  const percentage = Math.min(100, Math.round((used / limit) * 100));
 
-  if (!userSnap.exists) {
-    return { allowed: false, remaining: 0 };
-  }
-
-  const userData = userSnap.data();
-  const plan = userData?.plan || "FREE";
-  
-  // Here we would ideally check if the month has reset, but for MVP we just use the raw count
-  const generations = userData?.usage?.generations || 0;
-  const limit = PLAN_LIMITS[plan as keyof typeof PLAN_LIMITS] || PLAN_LIMITS.FREE;
-
-  const remaining = Math.max(0, limit - generations);
   return {
-    allowed: generations < limit,
+    plan,
+    used,
+    limit,
     remaining,
+    percentage,
+    resetAt,
   };
 }
 
-export async function incrementUsage(userId: string) {
-  if (!adminDb) return;
-  const userRef = adminDb.collection("users").doc(userId);
-  
-  // In a real app we'd use Firestore transactions/FieldValue.increment,
-  // but let's keep it simple or use adminDb.FieldValue.increment
-  
+/**
+ * Check if user is allowed to perform an AI generation
+ */
+export async function checkUsage(userId: string): Promise<{ allowed: boolean; usageInfo: UsageInfo }> {
+  const usageInfo = await getUsage(userId);
+  const allowed = usageInfo.remaining > 0;
+  return { allowed, usageInfo };
+}
+
+/**
+ * Atomically increment usage after a successful generation
+ */
+export async function incrementUsage(userId: string): Promise<void> {
+  if (!db || !userId) return;
+  const period = getCurrentPeriodId();
+  const usageDocId = `${userId}_${period}`;
+  const usageRef = doc(db, "usage", usageDocId);
+
   try {
-    const FieldValue = (await import("firebase-admin/firestore")).FieldValue;
-    await userRef.update({
-      "usage.generations": FieldValue.increment(1),
-      "usage.lastGeneration": FieldValue.serverTimestamp(),
-    });
-  } catch (error) {
-    console.error("Failed to increment usage", error);
+    const usageSnap = await getDoc(usageRef);
+    if (usageSnap.exists()) {
+      await updateDoc(usageRef, {
+        generationCount: increment(1),
+        updatedAt: serverTimestamp(),
+      });
+    } else {
+      await setDoc(usageRef, {
+        userId,
+        period,
+        generationCount: 1,
+        updatedAt: serverTimestamp(),
+      });
+    }
+  } catch (err) {
+    console.error("Error incrementing usage:", err);
   }
 }
 
-export async function saveServerGeneration(data: any) {
-  if (!adminDb) return null;
-  
+/**
+ * Save AI Generation record on server
+ */
+export async function saveServerGeneration(data: {
+  userId: string;
+  toolId: string;
+  category: string;
+  title: string;
+  input: any;
+  output: any;
+}): Promise<string | null> {
+  if (!db) return null;
   try {
-    const FieldValue = (await import("firebase-admin/firestore")).FieldValue;
-    const colRef = adminDb.collection("aiGenerations");
-    const docRef = await colRef.add({
+    const { collection, addDoc, serverTimestamp } = await import("firebase/firestore");
+    const colRef = collection(db, "aiGenerations");
+    const docRef = await addDoc(colRef, {
       ...data,
-      createdAt: FieldValue.serverTimestamp(),
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
       isFavorite: false,
     });
     return docRef.id;
-  } catch (error) {
-    console.error("Failed to save generation", error);
+  } catch (err) {
+    console.error("Error saving generation record:", err);
     return null;
   }
 }
+

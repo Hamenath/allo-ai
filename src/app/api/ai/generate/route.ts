@@ -42,9 +42,20 @@ export async function POST(req: Request) {
     }
 
     // 4. Check Usage Limits
-    const usage = await checkUsage(userId);
-    if (!usage.allowed) {
-      return NextResponse.json({ success: false, error: { code: "PAYMENT_REQUIRED", message: "Usage limit exceeded for your current plan." } }, { status: 402 });
+    const usageCheck = await checkUsage(userId);
+    if (!usageCheck.allowed) {
+      return NextResponse.json({
+        success: false,
+        error: {
+          code: "USAGE_LIMIT_REACHED",
+          message: "You've reached your monthly AI generation limit.",
+          usage: {
+            used: usageCheck.usageInfo.used,
+            limit: usageCheck.usageInfo.limit,
+            remaining: usageCheck.usageInfo.remaining,
+          }
+        }
+      }, { status: 403 });
     }
 
     // 5. Build Prompt
@@ -83,7 +94,7 @@ export async function POST(req: Request) {
       data: {
         id: savedDocId,
         result,
-        remainingUsage: usage.remaining - 1,
+        remainingUsage: usageCheck.usageInfo.remaining - 1,
       }
     });
 

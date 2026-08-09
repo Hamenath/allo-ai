@@ -9,6 +9,7 @@ import { Search, Sparkles, Briefcase, FileText, Code, ArrowRight, History, Zap, 
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { getAIGenerations, AIGeneration } from "@/lib/db/generations";
+import { getUsage, UsageInfo } from "@/lib/db/usage";
 import { format } from "date-fns";
 
 const tools = [
@@ -34,6 +35,7 @@ export default function DashboardPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [recentDocs, setRecentDocs] = useState<AIGeneration[]>([]);
   const [favoriteDocs, setFavoriteDocs] = useState<AIGeneration[]>([]);
+  const [usageInfo, setUsageInfo] = useState<UsageInfo | null>(null);
   const [loadingDocs, setLoadingDocs] = useState(true);
 
   useEffect(() => {
@@ -45,6 +47,9 @@ export default function DashboardPage() {
         
         const { docs: favs } = await getAIGenerations(user.uid, { isFavorite: true, limitCount: 4 });
         setFavoriteDocs(favs);
+
+        const usageData = await getUsage(user.uid);
+        setUsageInfo(usageData);
       } catch (err) {
         console.error("Failed to load dashboard docs", err);
       } finally {
@@ -235,18 +240,33 @@ export default function DashboardPage() {
             </Card>
 
             <Card className="border-border/50 shadow-sm">
-              <CardHeader className="bg-muted/20 border-b py-3">
-                <CardTitle className="text-sm flex items-center"><Sparkles className="mr-2 h-4 w-4" /> Usage Overview</CardTitle>
+              <CardHeader className="bg-muted/20 border-b py-3 flex flex-row items-center justify-between space-y-0">
+                <CardTitle className="text-sm flex items-center"><Sparkles className="mr-2 h-4 w-4 text-primary" /> AI Usage</CardTitle>
+                <Badge variant="outline" className="text-[10px] font-normal">{usageInfo?.plan || "FREE"}</Badge>
               </CardHeader>
-              <CardContent className="p-4">
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-sm font-medium">Generations</span>
-                  <span className="text-sm text-muted-foreground">Unlimited / Free</span>
+              <CardContent className="p-4 space-y-3">
+                <div className="flex justify-between items-baseline">
+                  <span className="text-2xl font-bold">{usageInfo?.used ?? 0} <span className="text-sm font-normal text-muted-foreground">/ {usageInfo?.limit ?? 5}</span></span>
+                  <span className="text-xs text-muted-foreground">{usageInfo?.remaining ?? 5} remaining</span>
                 </div>
                 <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
-                  <div className="h-full bg-primary/20 w-full rounded-full relative overflow-hidden">
-                    <div className="absolute inset-0 bg-primary/40 shimmer-effect"></div>
-                  </div>
+                  <div 
+                    className={`h-full transition-all duration-300 ${
+                      (usageInfo?.remaining ?? 5) <= 0 ? 'bg-destructive' : (usageInfo?.percentage ?? 0) >= 80 ? 'bg-amber-500' : 'bg-primary'
+                    }`} 
+                    style={{ width: `${usageInfo?.percentage ?? 0}%` }}
+                  />
+                </div>
+                {((usageInfo?.remaining ?? 5) <= 1) && (
+                  <p className="text-xs text-amber-500 font-medium pt-1">You&apos;re almost at your monthly limit.</p>
+                )}
+                <div className="pt-2 flex gap-2">
+                  <Link href="/usage" className="flex-1">
+                    <Button variant="outline" size="sm" className="w-full text-xs h-8">View Usage</Button>
+                  </Link>
+                  <Link href="/billing" className="flex-1">
+                    <Button variant={(usageInfo?.remaining ?? 5) <= 1 ? "default" : "secondary"} size="sm" className="w-full text-xs h-8">Upgrade</Button>
+                  </Link>
                 </div>
               </CardContent>
             </Card>
