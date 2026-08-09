@@ -91,9 +91,16 @@ export default function Home() {
                   ))}
                 </div>
               </div>
-              <div className="relative aspect-square lg:aspect-auto lg:h-[600px] rounded-2xl border bg-muted/30 overflow-hidden flex items-center justify-center">
-                <div className="absolute inset-0 bg-gradient-to-tr from-primary/5 via-primary/5 to-transparent"></div>
-                <div className="text-muted-foreground text-sm font-mono">[Dashboard Preview]</div>
+              <div className="relative aspect-square lg:aspect-auto lg:h-150 rounded-2xl border bg-muted/30 overflow-hidden p-8 flex flex-col justify-center gap-4">
+                <div className="absolute inset-0 bg-linear-to-tr from-primary/5 via-primary/5 to-transparent"></div>
+                <div className="relative grid grid-cols-2 gap-3">
+                  {["Resume Analyzer", "Cover Letter", "LinkedIn Post", "GitHub README", "Startup Validator", "Meeting Summarizer"].map((tool) => (
+                    <div key={tool} className="flex items-center gap-2 rounded-lg bg-background/80 backdrop-blur border px-3 py-2.5 text-sm font-medium shadow-sm">
+                      <span className="h-2 w-2 rounded-full bg-primary shrink-0" />
+                      {tool}
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           </div>
@@ -106,7 +113,7 @@ export default function Home() {
               Ready to simplify your workflow?
             </h2>
             <p className="text-xl text-muted-foreground mb-10 max-w-2xl mx-auto">
-              Join thousands of professionals who have replaced their fragmented toolset with ALLO.
+              Stop switching between apps. Get everything done in one AI workspace — built for career, business, development, and productivity.
             </p>
             <Link href="/signup">
               <Button size="lg" className="text-base px-8">

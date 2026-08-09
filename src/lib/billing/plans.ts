@@ -36,7 +36,7 @@ export const PLANS: Record<PlanType, PlanConfig> = {
       "All AI tools (Career, Dev, Learning)",
       "Unlimited saved history",
       "Advanced document export",
-      "Priority AI processing speed",
+      "Early access to new tools",
     ],
   },
   BUSINESS: {
