@@ -1,5 +1,5 @@
 <div align="center">
-  # ALLO — All-in-One AI Workspace 🚀
+  <h1>ALLO — All-in-One AI Workspace 🚀</h1>
   
   **Everything you need. One place.**
   
