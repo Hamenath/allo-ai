@@ -30,7 +30,7 @@ export async function sendTransactionalEmail(options: EmailOptions): Promise<{ s
     }
 
     const apiKey = process.env.RESEND_API_KEY;
-    const fromEmail = process.env.EMAIL_FROM || "ALLO AI <notifications@allo.ai>";
+    const fromEmail = process.env.EMAIL_FROM || "ALLO AI <notifications@example.com>";
 
     let delivered = false;
 
