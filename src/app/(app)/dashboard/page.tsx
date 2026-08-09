@@ -42,13 +42,13 @@ export default function DashboardPage() {
     async function loadRecentDocs() {
       if (!user) return;
       try {
-        const { docs } = await getAIGenerations(user.uid, { limitCount: 4 });
-        setRecentDocs(docs);
-        
-        const { docs: favs } = await getAIGenerations(user.uid, { isFavorite: true, limitCount: 4 });
-        setFavoriteDocs(favs);
-
-        const usageData = await getUsage(user.uid);
+        const [recentRes, favRes, usageData] = await Promise.all([
+          getAIGenerations(user.uid, { limitCount: 4 }),
+          getAIGenerations(user.uid, { isFavorite: true, limitCount: 4 }),
+          getUsage(user.uid),
+        ]);
+        setRecentDocs(recentRes.docs);
+        setFavoriteDocs(favRes.docs);
         setUsageInfo(usageData);
       } catch (err) {
         console.error("Failed to load dashboard docs", err);

@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Activity, ShieldCheck, Database, Key, CreditCard, Mail } from "lucide-react";
+import { Activity, ShieldCheck, Database, Key, CreditCard, Mail, Gauge } from "lucide-react";
 
 export default function AdminSystemPage() {
   const { user } = useAuth();
@@ -108,6 +108,39 @@ export default function AdminSystemPage() {
                 </div>
               </div>
               <Badge variant="outline">{health?.emailProvider}</Badge>
+            </div>
+
+            <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 flex justify-between items-center">
+              <div className="flex items-center gap-3">
+                <Gauge className="h-5 w-5 text-indigo-400" />
+                <div>
+                  <p className="font-semibold text-sm">Infrastructure Rate Limiter</p>
+                  <p className="text-xs text-slate-400">Centralized Throttling Engine</p>
+                </div>
+              </div>
+              <Badge variant="outline">{health?.rateLimiting}</Badge>
+            </div>
+
+            <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 flex justify-between items-center">
+              <div className="flex items-center gap-3">
+                <Gauge className="h-5 w-5 text-amber-400" />
+                <div>
+                  <p className="font-semibold text-sm">Distributed Redis Store</p>
+                  <p className="text-xs text-slate-400">Multi-instance Shared Counter</p>
+                </div>
+              </div>
+              <Badge variant="outline">{health?.distributedStore}</Badge>
+            </div>
+
+            <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 flex justify-between items-center">
+              <div className="flex items-center gap-3">
+                <ShieldCheck className="h-5 w-5 text-emerald-400" />
+                <div>
+                  <p className="font-semibold text-sm">AI Concurrency Protection</p>
+                  <p className="text-xs text-slate-400">Active Request Lock Guard</p>
+                </div>
+              </div>
+              <Badge variant="outline">{health?.aiProtection}</Badge>
             </div>
           </div>
         </CardContent>

@@ -16,6 +16,9 @@ export async function GET(req: Request) {
     const isFirebaseAdminReady = Boolean(adminDb && adminAuth);
     const nodeEnv = process.env.NODE_ENV || "development";
 
+    const { isDistributedStoreConfigured } = await import("@/lib/security/rate-limit");
+    const isRedisReady = isDistributedStoreConfigured();
+
     return NextResponse.json({
       success: true,
       data: {
@@ -26,6 +29,9 @@ export async function GET(req: Request) {
         geminiAi: isGeminiConfigured ? "Configured ✓" : "Missing API Key ✗",
         razorpayBilling: isRazorpayReady ? "Configured ✓" : "Missing Keys ✗",
         emailProvider: isEmailReady ? "Configured ✓ (Resend)" : "Development Logging ✗",
+        rateLimiting: "Configured ✓",
+        distributedStore: isRedisReady ? "Configured ✓ (Upstash Redis)" : "Development Fallback ✗ (Redis required for multi-instance)",
+        aiProtection: "Active ✓ (10 req/min, 2 concurrent lock)",
       },
     });
   } catch (error: any) {

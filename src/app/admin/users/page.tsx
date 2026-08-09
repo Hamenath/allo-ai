@@ -42,8 +42,11 @@ export default function AdminUsersPage() {
   }
 
   useEffect(() => {
-    loadUsers();
-  }, [user, planFilter]);
+    const timer = setTimeout(() => {
+      loadUsers();
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [user, searchTerm, planFilter]);
 
   const handleToggleStatus = async (targetUserId: string, currentDisabled: boolean) => {
     if (!user) return;

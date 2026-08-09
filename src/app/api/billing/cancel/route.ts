@@ -19,6 +19,13 @@ export async function POST(req: Request) {
       if (!adminAuth) throw new Error("Firebase Admin not configured");
       const decoded = await adminAuth.verifyIdToken(token);
       userId = decoded.uid;
+
+      // 2. Billing Rate Limit Check (5 req/min)
+      const { checkRateLimit, rateLimitedResponse, RATE_LIMIT_CONFIG } = await import("@/lib/security/rate-limit");
+      const rateLimitCheck = await checkRateLimit(`billing_cancel_${userId}`, RATE_LIMIT_CONFIG.billing);
+      if (!rateLimitCheck.allowed) {
+        return rateLimitedResponse(rateLimitCheck.retryAfter, "Cancellation rate limit exceeded. Please wait a moment.");
+      }
     } catch {
       return NextResponse.json(
         { success: false, error: { code: "UNAUTHORIZED", message: "Invalid authorization token" } },
