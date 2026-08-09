@@ -171,7 +171,7 @@ ${result.followUps?.map((p: string) => "- " + p).join("\\n")}
                 <Textarea 
                   {...form.register("transcript")} 
                   placeholder="Paste the raw transcript or your messy notes here..." 
-                  className="min-h-[400px] bg-background" 
+                  className="min-h-100 bg-background" 
                 />
                 {form.formState.errors.transcript && <p className="text-sm text-destructive mt-1">{form.formState.errors.transcript.message}</p>}
               </div>
@@ -189,7 +189,7 @@ ${result.followUps?.map((p: string) => "- " + p).join("\\n")}
               type="submit" 
               form="meeting-form" 
               disabled={isGenerating} 
-              className="w-full sm:w-auto min-w-[120px]"
+              className="w-full sm:w-auto min-w-30"
             >
               {isGenerating ? (
                 <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Summarizing...</>
@@ -247,7 +247,7 @@ ${result.followUps?.map((p: string) => "- " + p).join("\\n")}
                 <p>Paste a transcript and click Generate to see the structured summary.</p>
               </div>
             ) : isGenerating ? (
-              <div className="flex flex-col items-center justify-center h-[500px] text-muted-foreground p-12">
+              <div className="flex flex-col items-center justify-center h-125 text-muted-foreground p-12">
                 <Loader2 className="h-12 w-12 animate-spin mb-4 text-primary" />
                 <p className="animate-pulse">Analyzing meeting transcript...</p>
               </div>
@@ -366,7 +366,7 @@ ${result.followUps?.map((p: string) => "- " + p).join("\\n")}
                           ) : (
                             <>
                               {item.owner && <Badge variant="secondary">{item.owner}</Badge>}
-                              {item.deadline && <Badge variant="outline" className="text-amber-600 border-amber-200 bg-amber-50 dark:bg-amber-500/10 dark:border-amber-500/20">{item.deadline}</Badge>}
+                              {item.deadline && <Badge variant="outline" className="text-amber-600 dark:text-amber-400 border-amber-500/30 bg-amber-500/10">{item.deadline}</Badge>}
                             </>
                           )}
                         </div>

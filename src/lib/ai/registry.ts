@@ -12,6 +12,8 @@ export interface AITool {
   outputSchema: z.ZodType<any>;
   systemPrompt: (input: any) => string;
   planRequirement: "FREE" | "PRO" | "BUSINESS";
+  route?: string;
+  keywords?: string[];
 }
 
 // --------------------------------------------------------
@@ -635,6 +637,8 @@ export const toolsRegistry: Record<string, AITool> = {
     outputSchema: ResumeAnalyzerOutputSchema,
     systemPrompt: ResumeAnalyzerPrompt,
     planRequirement: "FREE",
+    route: "/tools/resume-analyzer",
+    keywords: ["resume", "cv", "ats", "job", "career"],
   },
   "interview-generator": {
     id: "interview-generator",
@@ -646,28 +650,34 @@ export const toolsRegistry: Record<string, AITool> = {
     outputSchema: InterviewGeneratorOutputSchema,
     systemPrompt: InterviewGeneratorPrompt,
     planRequirement: "FREE",
+    route: "/tools/interview-generator",
+    keywords: ["interview", "questions", "practice", "prep", "job"],
   },
   "linkedin-generator": {
     id: "linkedin-generator",
     name: "LinkedIn Generator",
     category: "CAREER",
     description: "Generate highly engaging LinkedIn posts and updates.",
-    icon: "Linkedin", // Assuming standard lucide icon usage (will use a generic one if missing)
+    icon: "Linkedin",
     inputSchema: LinkedinGeneratorInputSchema,
     outputSchema: LinkedinGeneratorOutputSchema,
     systemPrompt: LinkedinGeneratorPrompt,
     planRequirement: "FREE",
+    route: "/tools/linkedin-generator",
+    keywords: ["linkedin", "social", "post", "network", "career"],
   },
   "cold-email": {
     id: "cold-email",
     name: "Cold Email Generator",
-    category: "CAREER", // Placed in Career for now as per instructions "Career category should contain... Cold Email Generator"
+    category: "CAREER",
     description: "Generate high-converting cold outreach emails.",
     icon: "Mail",
     inputSchema: ColdEmailGeneratorInputSchema,
     outputSchema: ColdEmailGeneratorOutputSchema,
     systemPrompt: ColdEmailGeneratorPrompt,
     planRequirement: "FREE",
+    route: "/tools/cold-email",
+    keywords: ["email", "cold", "outreach", "sales", "networking"],
   },
   "cover-letter": {
     id: "cover-letter",
@@ -679,6 +689,8 @@ export const toolsRegistry: Record<string, AITool> = {
     outputSchema: CoverLetterGeneratorOutputSchema,
     systemPrompt: CoverLetterGeneratorPrompt,
     planRequirement: "FREE",
+    route: "/tools/cover-letter",
+    keywords: ["cover letter", "job", "application", "career"],
   },
   "study-planner": {
     id: "study-planner",
@@ -690,6 +702,8 @@ export const toolsRegistry: Record<string, AITool> = {
     outputSchema: StudyPlannerOutputSchema,
     systemPrompt: StudyPlannerPrompt,
     planRequirement: "FREE",
+    route: "/tools/study-planner",
+    keywords: ["study", "plan", "learning", "schedule", "school", "exam"],
   },
   "job-description": {
     id: "job-description",
@@ -701,6 +715,8 @@ export const toolsRegistry: Record<string, AITool> = {
     outputSchema: JobDescriptionOutputSchema,
     systemPrompt: JobDescriptionPrompt,
     planRequirement: "FREE",
+    route: "/tools/job-description",
+    keywords: ["job", "description", "hiring", "recruitment", "hr"],
   },
   "proposal": {
     id: "proposal",
@@ -712,6 +728,8 @@ export const toolsRegistry: Record<string, AITool> = {
     outputSchema: ProposalOutputSchema,
     systemPrompt: ProposalPrompt,
     planRequirement: "FREE",
+    route: "/tools/proposal",
+    keywords: ["proposal", "client", "sales", "contract", "business"],
   },
   "social-calendar": {
     id: "social-calendar",
@@ -723,6 +741,8 @@ export const toolsRegistry: Record<string, AITool> = {
     outputSchema: SocialCalendarOutputSchema,
     systemPrompt: SocialCalendarPrompt,
     planRequirement: "FREE",
+    route: "/tools/social-calendar",
+    keywords: ["social", "media", "calendar", "marketing", "content"],
   },
   "startup-validator": {
     id: "startup-validator",
@@ -734,6 +754,8 @@ export const toolsRegistry: Record<string, AITool> = {
     outputSchema: StartupValidatorOutputSchema,
     systemPrompt: StartupValidatorPrompt,
     planRequirement: "FREE",
+    route: "/tools/startup-validator",
+    keywords: ["startup", "idea", "validator", "business", "founder", "vc"],
   },
   "github-readme": {
     id: "github-readme",
@@ -745,6 +767,8 @@ export const toolsRegistry: Record<string, AITool> = {
     outputSchema: GithubReadmeOutputSchema,
     systemPrompt: GithubReadmePrompt,
     planRequirement: "FREE",
+    route: "/tools/github-readme",
+    keywords: ["github", "readme", "markdown", "developer", "open source"],
   },
   "bug-report": {
     id: "bug-report",
@@ -756,6 +780,8 @@ export const toolsRegistry: Record<string, AITool> = {
     outputSchema: BugReportOutputSchema,
     systemPrompt: BugReportPrompt,
     planRequirement: "FREE",
+    route: "/tools/bug-report",
+    keywords: ["bug", "report", "qa", "developer", "issue", "ticket"],
   },
   "meeting-summarizer": {
     id: "meeting-summarizer",
@@ -767,5 +793,7 @@ export const toolsRegistry: Record<string, AITool> = {
     outputSchema: MeetingSummarizerOutputSchema,
     systemPrompt: MeetingSummarizerPrompt,
     planRequirement: "FREE",
+    route: "/tools/meeting-summarizer",
+    keywords: ["meeting", "summary", "notes", "productivity", "transcript"],
   },
 };

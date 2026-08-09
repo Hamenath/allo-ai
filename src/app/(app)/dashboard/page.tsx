@@ -5,7 +5,7 @@ import { useAuth } from "@/context/AuthContext";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Search, Sparkles, Briefcase, FileText, Code, ArrowRight, History, Zap, Users, GraduationCap, ChevronRight, File } from "lucide-react";
+import { Search, Sparkles, Briefcase, FileText, Code, ArrowRight, History, Zap, Users, GraduationCap, ChevronRight, File, Heart } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { getAIGenerations, AIGeneration } from "@/lib/db/generations";
@@ -33,6 +33,7 @@ export default function DashboardPage() {
   const { user } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
   const [recentDocs, setRecentDocs] = useState<AIGeneration[]>([]);
+  const [favoriteDocs, setFavoriteDocs] = useState<AIGeneration[]>([]);
   const [loadingDocs, setLoadingDocs] = useState(true);
 
   useEffect(() => {
@@ -41,8 +42,11 @@ export default function DashboardPage() {
       try {
         const { docs } = await getAIGenerations(user.uid, { limitCount: 4 });
         setRecentDocs(docs);
+        
+        const { docs: favs } = await getAIGenerations(user.uid, { isFavorite: true, limitCount: 4 });
+        setFavoriteDocs(favs);
       } catch (err) {
-        console.error("Failed to load recent docs", err);
+        console.error("Failed to load dashboard docs", err);
       } finally {
         setLoadingDocs(false);
       }
@@ -63,15 +67,14 @@ export default function DashboardPage() {
         <p className="text-muted-foreground text-lg">What would you like to get done today?</p>
       </div>
 
-      <div className="relative max-w-2xl">
-        <Search className="absolute left-3.5 top-3.5 h-5 w-5 text-muted-foreground" />
-        <Input 
-          type="search" 
-          placeholder="Search for tools... (e.g., Summarize meeting, Write a proposal)" 
-          className="pl-11 h-12 text-base rounded-full shadow-sm bg-background border-muted-foreground/20"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-        />
+      <div className="relative max-w-2xl group" onClick={() => window.dispatchEvent(new CustomEvent('open-command'))}>
+        <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
+        <div className="flex h-12 w-full items-center justify-between rounded-full border border-muted-foreground/20 bg-background px-4 py-2 pl-11 shadow-sm transition-colors hover:bg-muted/50 cursor-text">
+          <span className="text-muted-foreground">Search tools or tell ALLO what you want to do...</span>
+          <kbd className="pointer-events-none hidden h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium opacity-100 sm:flex">
+            <span className="text-xs">⌘</span>K
+          </kbd>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
@@ -144,7 +147,7 @@ export default function DashboardPage() {
         {/* Sidebar: Documents & Usage */}
         {!searchQuery && (
           <div className="space-y-6">
-            <Card className="border-border/50 shadow-sm flex flex-col h-auto min-h-[400px]">
+            <Card className="border-border/50 shadow-sm flex flex-col h-auto min-h-100">
               <CardHeader className="bg-muted/20 border-b">
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-lg flex items-center">
@@ -191,6 +194,46 @@ export default function DashboardPage() {
               </CardContent>
             </Card>
             
+            <Card className="border-border/50 shadow-sm flex flex-col h-auto">
+              <CardHeader className="bg-muted/20 border-b py-3">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-sm flex items-center">
+                    <Heart className="mr-2 h-4 w-4 text-rose-500" /> Favorites
+                  </CardTitle>
+                  <Link href="/favorites">
+                    <Button variant="ghost" size="sm" className="h-8 px-2 text-muted-foreground text-xs">
+                      View all
+                    </Button>
+                  </Link>
+                </div>
+              </CardHeader>
+              <CardContent className="p-0 flex flex-col">
+                {loadingDocs ? (
+                  <div className="flex items-center justify-center py-8">
+                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-rose-500"></div>
+                  </div>
+                ) : favoriteDocs.length > 0 ? (
+                  <div className="divide-y flex-1">
+                    {favoriteDocs.map((doc) => (
+                      <Link key={doc.id} href="/favorites" className="block hover:bg-muted/30 transition-colors p-3">
+                        <div className="flex items-start justify-between">
+                          <div className="space-y-1 overflow-hidden pr-2">
+                            <p className="font-medium text-xs line-clamp-1 group-hover:text-primary transition-colors">{doc.title || "Untitled"}</p>
+                            <span className="text-[10px] text-muted-foreground">{doc.toolId}</span>
+                          </div>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center justify-center py-8 text-center px-4">
+                    <Heart className="h-6 w-6 text-muted-foreground/30 mb-2" />
+                    <p className="text-xs text-muted-foreground">No favorites yet</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
             <Card className="border-border/50 shadow-sm">
               <CardHeader className="bg-muted/20 border-b py-3">
                 <CardTitle className="text-sm flex items-center"><Sparkles className="mr-2 h-4 w-4" /> Usage Overview</CardTitle>

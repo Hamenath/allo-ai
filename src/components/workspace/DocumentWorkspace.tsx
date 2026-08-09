@@ -142,7 +142,7 @@ export function DocumentWorkspace({ title, description, onlyFavorites = false }:
             />
           </div>
           <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-            <SelectTrigger className="w-full sm:w-[150px] bg-background">
+            <SelectTrigger className="w-full sm:w-36 bg-background">
               <SelectValue placeholder="Category" />
             </SelectTrigger>
             <SelectContent>
@@ -199,7 +199,7 @@ export function DocumentWorkspace({ title, description, onlyFavorites = false }:
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="flex-1">
-                  <div className="text-sm text-muted-foreground line-clamp-3 bg-muted/30 p-3 rounded-md min-h-[60px]">
+                  <div className="text-sm text-muted-foreground line-clamp-3 bg-muted/30 p-3 rounded-md min-h-15">
                     {doc.output?.fullEmail || doc.output?.opening || doc.output?.variations?.[0]?.hook || doc.output?.overallStrategy || doc.output?.summary || doc.output?.markdown || 'View full document'}
                   </div>
                 </CardContent>

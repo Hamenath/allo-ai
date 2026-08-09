@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Search, Sparkles, Briefcase, FileText, Code, ArrowLeft } from "lucide-react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 
 const tools = [
@@ -26,9 +27,13 @@ const tools = [
   { id: "meeting-summarizer", name: "Meeting Summarizer", category: "Productivity", icon: Sparkles, color: "text-orange-500", bg: "bg-orange-500/10", desc: "Convert chaotic meeting transcripts into structured summaries." },
 ];
 
-export default function ToolsDirectoryPage() {
+import { Suspense } from "react";
+
+function ToolsDirectoryContent() {
+  const searchParams = useSearchParams();
+  const initialCategory = searchParams.get("category");
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(initialCategory);
 
   const categories = Array.from(new Set(tools.map(t => t.category)));
 
@@ -54,15 +59,11 @@ export default function ToolsDirectoryPage() {
       </div>
 
       <div className="flex flex-col md:flex-row gap-4 mb-8">
-        <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-3.5 top-3.5 h-5 w-5 text-muted-foreground" />
-          <Input 
-            type="search" 
-            placeholder="Search all tools..." 
-            className="pl-11 h-12 text-base rounded-xl shadow-sm"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
+        <div className="relative flex-1 max-w-md group" onClick={() => window.dispatchEvent(new CustomEvent('open-command'))}>
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
+          <div className="flex h-12 w-full items-center justify-between rounded-xl border border-input bg-background px-4 py-2 pl-11 shadow-sm transition-colors hover:bg-muted/50 cursor-text">
+            <span className="text-muted-foreground">Search all tools (Ctrl+K)...</span>
+          </div>
         </div>
         <div className="flex gap-2 items-center flex-wrap">
           <Button 
@@ -111,5 +112,13 @@ export default function ToolsDirectoryPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function ToolsDirectoryPage() {
+  return (
+    <Suspense fallback={<div className="p-8 text-center text-muted-foreground">Loading tools...</div>}>
+      <ToolsDirectoryContent />
+    </Suspense>
   );
 }

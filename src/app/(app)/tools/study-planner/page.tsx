@@ -285,14 +285,14 @@ export default function StudyPlannerPage() {
             </CardHeader>
             <CardContent className="p-0 flex-1 overflow-auto bg-muted/10">
               {!result && !isGenerating ? (
-                <div className="flex flex-col items-center justify-center h-full text-muted-foreground p-12 text-center min-h-[500px]">
+                <div className="flex flex-col items-center justify-center h-full text-muted-foreground p-12 text-center min-h-125">
                   <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mb-4">
                     <GraduationCap className="h-8 w-8 opacity-50" />
                   </div>
                   <p>Fill out your study requirements and click Generate to create your personalized plan.</p>
                 </div>
               ) : isGenerating ? (
-                <div className="flex flex-col items-center justify-center h-full text-muted-foreground p-12 min-h-[500px]">
+                <div className="flex flex-col items-center justify-center h-full text-muted-foreground p-12 min-h-125">
                   <Loader2 className="h-12 w-12 animate-spin mb-4 text-primary" />
                   <p className="animate-pulse">Building your perfect study plan...</p>
                 </div>
@@ -402,8 +402,8 @@ export default function StudyPlannerPage() {
 
                       <TabsContent value="revision" className="mt-0 space-y-6 outline-none">
                         <div className="space-y-6">
-                          <div className="bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 p-6 rounded-xl">
-                            <h3 className="font-semibold text-lg text-amber-700 dark:text-amber-500 mb-3">Revision Strategy</h3>
+                          <div className="bg-amber-500/10 border border-amber-500/30 p-6 rounded-xl">
+                            <h3 className="font-semibold text-lg text-amber-700 dark:text-amber-400 mb-3">Revision Strategy</h3>
                             <p className="text-foreground leading-relaxed">{result.revisionSchedule}</p>
                           </div>
 
