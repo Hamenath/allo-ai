@@ -1,5 +1,5 @@
 <div align="center">
-  ## ALLO — All-in-One AI Workspace 🚀
+  # ALLO — All-in-One AI Workspace 🚀
   
   **Everything you need. One place.**
   
@@ -36,11 +36,8 @@ Whether you are optimizing your career, analyzing a startup, writing code, or st
 - **Favorites & History**: Fully integrated with Firebase Firestore to persist generation histories, allowing you to seamlessly revisit and favorite previous AI outputs.
 - **Secure Authentication**: Firebase Auth guards routes using a Higher-Order Component and validates API calls securely via Firebase Admin SDK.
 
-<br/>
 
-## 📸 Sneak Peek
 
-<br/>
 
 ## 🚀 Getting Started
 
