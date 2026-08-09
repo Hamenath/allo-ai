@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { checkRateLimit, acquireConcurrencyLock, RATE_LIMIT_CONFIG } from "@/lib/security/rate-limit";
+import { checkRateLimit, acquireConcurrencyLock, RATE_LIMIT_CONFIG } from "../../src/lib/security/rate-limit";
 
 describe("Infrastructure Rate Limiting & Concurrency Engine", () => {
   it("should have correct rate limit configurations defined", () => {

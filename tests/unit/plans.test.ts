@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { getPlanConfig, PLANS } from "@/lib/billing/plans";
+import { getPlanConfig, PLANS } from "../../src/lib/billing/plans";
 
 describe("Pricing Plans & Quotas Configuration", () => {
   it("should return FREE plan by default when unspecified or invalid", () => {

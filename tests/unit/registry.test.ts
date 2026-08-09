@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { toolsRegistry } from "@/lib/ai/registry";
+import { toolsRegistry } from "../../src/lib/ai/registry";
 
 describe("AI Tools Registry & Input Validation Schemas", () => {
   it("should contain registered AI tools", () => {

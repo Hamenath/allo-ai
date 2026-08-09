@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { mapToUserFriendlyError, generateRequestId } from "@/lib/errors";
+import { mapToUserFriendlyError, generateRequestId } from "../../src/lib/errors";
 
 describe("Error Classification & Correlation System", () => {
   it("should generate valid request correlation IDs starting with ALLO-", () => {

@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { isSystemPromptExposed } from "@/lib/security/prompt-guard";
+import { isSystemPromptExposed } from "../../src/lib/security/prompt-guard";
 
 describe("Security & Threat Fencing Tests", () => {
   it("should detect prompt injection attempts attempting to leak system instructions", () => {
