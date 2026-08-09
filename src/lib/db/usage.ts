@@ -116,6 +116,56 @@ export async function incrementUsage(userId: string): Promise<void> {
         updatedAt: serverTimestamp(),
       });
     }
+
+    // Trigger threshold alerts asynchronously without blocking execution
+    setTimeout(async () => {
+      try {
+        const info = await getUsage(userId);
+        const { createNotificationIdempotent } = await import("./notifications");
+        const { sendTransactionalEmail } = await import("../email/provider");
+        const { getUsageWarningEmailTemplate, getUsageLimitEmailTemplate } = await import("../email/templates");
+
+        if (info.remaining <= 0) {
+          const key = `${userId}_usage_100_${period}`;
+          await createNotificationIdempotent(userId, key, {
+            type: "usage_limit",
+            title: "AI Generation Quota Reached",
+            message: `You've used all ${info.limit} AI generations for this month. Upgrade to continue creating.`,
+            link: "/billing",
+          });
+          const userDoc = await getDoc(doc(db, "users", userId));
+          const userEmail = userDoc.data()?.email;
+          if (userEmail) {
+            const template = getUsageLimitEmailTemplate(info.used, info.limit);
+            await sendTransactionalEmail({
+              to: userEmail,
+              ...template,
+              idempotencyKey: key,
+            });
+          }
+        } else if (info.percentage >= 80) {
+          const key = `${userId}_usage_80_${period}`;
+          await createNotificationIdempotent(userId, key, {
+            type: "usage_warning",
+            title: "Approaching Monthly AI Quota",
+            message: `You've used ${info.used} of ${info.limit} AI generations (${info.percentage}%).`,
+            link: "/usage",
+          });
+          const userDoc = await getDoc(doc(db, "users", userId));
+          const userEmail = userDoc.data()?.email;
+          if (userEmail) {
+            const template = getUsageWarningEmailTemplate(info.used, info.limit);
+            await sendTransactionalEmail({
+              to: userEmail,
+              ...template,
+              idempotencyKey: key,
+            });
+          }
+        }
+      } catch (err) {
+        console.error("Error triggering usage threshold alert:", err);
+      }
+    }, 100);
   } catch (err) {
     console.error("Error incrementing usage:", err);
   }

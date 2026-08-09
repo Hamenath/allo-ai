@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Activity, ShieldCheck, Database, Key, CreditCard } from "lucide-react";
+import { Activity, ShieldCheck, Database, Key, CreditCard, Mail } from "lucide-react";
 
 export default function AdminSystemPage() {
   const { user } = useAuth();
@@ -97,6 +97,17 @@ export default function AdminSystemPage() {
                 </div>
               </div>
               <Badge variant="outline">{health?.razorpayBilling}</Badge>
+            </div>
+
+            <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 flex justify-between items-center">
+              <div className="flex items-center gap-3">
+                <Mail className="h-5 w-5 text-blue-400" />
+                <div>
+                  <p className="font-semibold text-sm">Email Service</p>
+                  <p className="text-xs text-slate-400">Transactional Delivery Engine</p>
+                </div>
+              </div>
+              <Badge variant="outline">{health?.emailProvider}</Badge>
             </div>
           </div>
         </CardContent>

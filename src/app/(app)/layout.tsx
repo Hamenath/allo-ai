@@ -27,6 +27,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { CommandPalette } from "../../components/CommandPalette";
+import { NotificationBell } from "@/components/notifications/NotificationBell";
 
 const sidebarLinks = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
@@ -137,7 +138,12 @@ export default function AppLayout({
               </Sheet>
               <span className="font-mono text-xl font-bold tracking-tight">ALLO</span>
             </div>
+            <NotificationBell />
           </header>
+          
+          <div className="hidden md:flex h-14 items-center justify-end px-8 border-b bg-background/95 backdrop-blur sticky top-0 z-10">
+            <NotificationBell />
+          </div>
           
           <main className="flex-1 p-4 md:p-8 max-w-7xl mx-auto w-full">
             {children}

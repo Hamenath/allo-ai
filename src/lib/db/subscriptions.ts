@@ -117,6 +117,60 @@ export async function activateUserSubscription(
     },
     { merge: true }
   );
+
+  // 3. Asynchronously trigger billing notifications & emails
+  setTimeout(async () => {
+    try {
+      const { createNotificationIdempotent } = await import("./notifications");
+      const { sendTransactionalEmail } = await import("../email/provider");
+      const { getSubscriptionActivatedEmailTemplate, getSubscriptionCancelledEmailTemplate } = await import("../email/templates");
+      const { getPlanConfig } = await import("../billing/plans");
+
+      const planConfig = getPlanConfig(details.plan);
+
+      if (details.status === "active") {
+        const key = `${userId}_sub_activated_${details.plan}_${details.providerOrderId || Date.now()}`;
+        await createNotificationIdempotent(userId, key, {
+          type: "payment_success",
+          title: `${planConfig.name} Plan Activated`,
+          message: `Your ${planConfig.name} plan is now active with ${planConfig.monthlyGenerations} monthly AI generations.`,
+          link: "/billing",
+        });
+
+        const userSnap = await getDoc(userRef);
+        const userEmail = userSnap.data()?.email;
+        if (userEmail) {
+          const template = getSubscriptionActivatedEmailTemplate(planConfig.name, planConfig.monthlyGenerations);
+          await sendTransactionalEmail({
+            to: userEmail,
+            ...template,
+            idempotencyKey: key,
+          });
+        }
+      } else if (details.cancelAtPeriodEnd) {
+        const key = `${userId}_sub_cancelled_${details.currentPeriodEnd || Date.now()}`;
+        await createNotificationIdempotent(userId, key, {
+          type: "subscription_cancelled",
+          title: "Subscription Set to Cancel",
+          message: `Your ${planConfig.name} subscription will remain active until ${details.currentPeriodEnd || 'the period end'}.`,
+          link: "/billing",
+        });
+
+        const userSnap = await getDoc(userRef);
+        const userEmail = userSnap.data()?.email;
+        if (userEmail) {
+          const template = getSubscriptionCancelledEmailTemplate(planConfig.name, details.currentPeriodEnd || "the end of current billing period");
+          await sendTransactionalEmail({
+            to: userEmail,
+            ...template,
+            idempotencyKey: key,
+          });
+        }
+      }
+    } catch (err) {
+      console.error("Error triggering billing notification:", err);
+    }
+  }, 100);
 }
 
 /**

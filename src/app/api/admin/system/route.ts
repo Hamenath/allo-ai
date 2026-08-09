@@ -12,6 +12,7 @@ export async function GET(req: Request) {
   try {
     const isGeminiConfigured = Boolean(process.env.GEMINI_API_KEY);
     const isRazorpayReady = isRazorpayConfigured();
+    const isEmailReady = Boolean(process.env.RESEND_API_KEY);
     const isFirebaseAdminReady = Boolean(adminDb && adminAuth);
     const nodeEnv = process.env.NODE_ENV || "development";
 
@@ -24,6 +25,7 @@ export async function GET(req: Request) {
         firestore: adminDb ? "Connected ✓" : "Disconnected ✗",
         geminiAi: isGeminiConfigured ? "Configured ✓" : "Missing API Key ✗",
         razorpayBilling: isRazorpayReady ? "Configured ✓" : "Missing Keys ✗",
+        emailProvider: isEmailReady ? "Configured ✓ (Resend)" : "Development Logging ✗",
       },
     });
   } catch (error: any) {

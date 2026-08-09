@@ -27,6 +27,35 @@ export default function SignupPage() {
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       await updateProfile(userCredential.user, { displayName: name });
+
+      // Asynchronously trigger welcome notification and email idempotently
+      setTimeout(async () => {
+        try {
+          const { createNotificationIdempotent } = await import("@/lib/db/notifications");
+          const { sendTransactionalEmail } = await import("@/lib/email/provider");
+          const { getWelcomeEmailTemplate } = await import("@/lib/email/templates");
+
+          const uid = userCredential.user.uid;
+          const key = `${uid}_welcome`;
+
+          await createNotificationIdempotent(uid, key, {
+            type: "welcome",
+            title: "Welcome to ALLO AI Workspace!",
+            message: "Explore 15+ AI tools across Career, Business, Developer, and Learning. You get 5 complimentary generations every month.",
+            link: "/dashboard",
+          });
+
+          const template = getWelcomeEmailTemplate(name);
+          await sendTransactionalEmail({
+            to: email,
+            ...template,
+            idempotencyKey: key,
+          });
+        } catch (err) {
+          console.error("Error triggering welcome actions:", err);
+        }
+      }, 100);
+
       router.push("/dashboard");
     } catch (err: any) {
       setError(err.message || "Failed to create account");
