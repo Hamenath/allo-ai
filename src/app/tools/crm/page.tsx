@@ -51,10 +51,6 @@ export default function CRMPage() {
   const [followUpDate, setFollowUpDate] = useState("");
   const [notes, setNotes] = useState("");
 
-  useEffect(() => {
-    fetchClients();
-  }, []);
-
   const fetchClients = async () => {
     try {
       const user = auth.currentUser;
@@ -68,6 +64,10 @@ export default function CRMPage() {
     }
   };
 
+  useEffect(() => {
+    fetchClients();
+  }, []);
+
   const filteredClients = useMemo(() => {
     return clients.filter(c => 
       c.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
@@ -77,7 +77,7 @@ export default function CRMPage() {
   }, [clients, searchQuery]);
 
   const metrics = useMemo(() => {
-    let total = clients.length;
+    const total = clients.length;
     let activeLeads = 0;
     let openDeals = 0;
     let wonDeals = 0;
@@ -276,7 +276,7 @@ export default function CRMPage() {
             <div className="text-center p-12">
               <Users className="h-12 w-12 text-muted-foreground/30 mx-auto mb-4" />
               <p className="text-lg font-medium text-foreground">No clients found</p>
-              <p className="text-sm text-muted-foreground mt-1 mb-4">You don't have any clients matching your search.</p>
+              <p className="text-sm text-muted-foreground mt-1 mb-4">You don&apos;t have any clients matching your search.</p>
               <Button variant="outline" onClick={openNewForm}>Add your first client</Button>
             </div>
           ) : (

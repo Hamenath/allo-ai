@@ -77,7 +77,7 @@ export default function FavoritesPage() {
           </div>
           <h2 className="text-xl font-semibold">No favorites yet</h2>
           <p className="text-muted-foreground mt-2 mb-6 max-w-sm text-sm">
-            You haven't saved any AI results to your favorites yet. Click the heart icon on any generated result to save it here.
+            You haven&apos;t saved any AI results to your favorites yet. Click the heart icon on any generated result to save it here.
           </p>
           <Link href="/dashboard">
             <Button>Explore Tools</Button>

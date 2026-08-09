@@ -472,6 +472,107 @@ Rules:
 `;
 
 // --------------------------------------------------------
+// 11. GITHUB README GENERATOR
+// --------------------------------------------------------
+
+export const GithubReadmeInputSchema = z.object({
+  projectName: z.string().min(2).max(100),
+  description: z.string().min(10).max(500),
+  projectType: z.string().max(100).optional(),
+  techStack: z.string().max(500).optional(),
+  features: z.string().max(1000).optional(),
+  installation: z.string().max(1000).optional(),
+  usage: z.string().max(1000).optional(),
+  envVars: z.string().max(1000).optional(),
+  apiInfo: z.string().max(1000).optional(),
+  deployment: z.string().max(1000).optional(),
+  contribution: z.string().max(1000).optional(),
+  license: z.string().max(100).optional(),
+});
+
+export const GithubReadmeOutputSchema = z.object({
+  markdown: z.string().describe("The complete, fully formatted raw Markdown for the README.md file"),
+});
+
+const GithubReadmePrompt = (input: z.infer<typeof GithubReadmeInputSchema>) => `
+You are an expert Developer Advocate and Open Source maintainer.
+Generate a highly professional, structured README.md for the following project.
+
+Project Name: ${input.projectName}
+Description: ${input.description}
+Project Type: ${input.projectType || "Not provided"}
+Tech Stack: ${input.techStack || "Not provided"}
+Features: ${input.features || "Not provided"}
+Installation Steps: ${input.installation || "Not provided"}
+Usage Information: ${input.usage || "Not provided"}
+Environment Variables: ${input.envVars || "Not provided"}
+API Information: ${input.apiInfo || "Not provided"}
+Deployment: ${input.deployment || "Not provided"}
+Contribution Instructions: ${input.contribution || "Not provided"}
+License: ${input.license || "Not provided"}
+
+Rules:
+1. ONLY use information provided. Do NOT invent features, API endpoints, or environment variables.
+2. If information for a section is missing (e.g., Installation), use a clear placeholder like "*(Add installation steps here)*" rather than fabricating it.
+3. Structure the README with standard sections: Title, Description, Screenshots placeholder, Features, Tech Stack, Installation, Environment Configuration, Usage, API Documentation (if applicable), Project Structure (placeholder if needed), Deployment, Contributing, License.
+4. Use professional markdown formatting (headers, code blocks, lists).
+5. Return ONLY valid JSON matching the schema, with the entire markdown string in the 'markdown' field.
+`;
+
+// --------------------------------------------------------
+// 12. BUG REPORT GENERATOR
+// --------------------------------------------------------
+
+export const BugReportInputSchema = z.object({
+  description: z.string().min(10).max(2000),
+  steps: z.string().max(2000).optional(),
+  expected: z.string().max(1000).optional(),
+  actual: z.string().max(1000).optional(),
+  browser: z.string().max(100).optional(),
+  device: z.string().max(100).optional(),
+  os: z.string().max(100).optional(),
+  version: z.string().max(100).optional(),
+  logs: z.string().max(5000).optional(),
+});
+
+export const BugReportOutputSchema = z.object({
+  title: z.string().describe("Clear, concise bug title"),
+  summary: z.string().describe("Brief summary of the issue"),
+  description: z.string().describe("Detailed description of the bug"),
+  stepsToReproduce: z.array(z.string()).describe("Ordered list of steps to reproduce"),
+  expectedResult: z.string(),
+  actualResult: z.string(),
+  environment: z.array(z.string()).describe("List of environment details (browser, OS, etc.)"),
+  severity: z.enum(["Critical", "High", "Medium", "Low"]),
+  priority: z.enum(["P0", "P1", "P2", "P3"]),
+  possibleCauses: z.array(z.string()).describe("Hypothesized possible causes"),
+  investigationSteps: z.array(z.string()).describe("Suggested steps to investigate the issue"),
+  additionalInfoNeeded: z.array(z.string()).describe("Any missing information that would help debug"),
+});
+
+const BugReportPrompt = (input: z.infer<typeof BugReportInputSchema>) => `
+You are an expert QA Engineer and Senior Developer.
+Convert the following messy bug description into a structured, professional bug report.
+
+Raw Bug Description: ${input.description}
+Steps Provided: ${input.steps || "Not provided"}
+Expected Behavior: ${input.expected || "Not provided"}
+Actual Behavior: ${input.actual || "Not provided"}
+Browser: ${input.browser || "Not provided"}
+Device: ${input.device || "Not provided"}
+OS: ${input.os || "Not provided"}
+App Version: ${input.version || "Not provided"}
+Console/Logs: ${input.logs || "Not provided"}
+
+Rules:
+1. Do NOT claim a confirmed root cause unless the provided logs/info absolutely prove it. Use language like "Possible cause" or "Suggested investigation".
+2. Do not fabricate logs, technical details, or environment specifics. If missing, note it in 'additionalInfoNeeded'.
+3. Assign an appropriate Severity and Priority based on standard software engineering practices.
+4. Format the output clearly.
+5. Return ONLY valid JSON matching the schema.
+`;
+
+// --------------------------------------------------------
 // REGISTRY EXPORT
 // --------------------------------------------------------
 
@@ -584,6 +685,28 @@ export const toolsRegistry: Record<string, AITool> = {
     inputSchema: StartupValidatorInputSchema,
     outputSchema: StartupValidatorOutputSchema,
     systemPrompt: StartupValidatorPrompt,
+    planRequirement: "FREE",
+  },
+  "github-readme": {
+    id: "github-readme",
+    name: "GitHub README Generator",
+    category: "DEVELOPER",
+    description: "Generate professional README.md for your projects.",
+    icon: "Github",
+    inputSchema: GithubReadmeInputSchema,
+    outputSchema: GithubReadmeOutputSchema,
+    systemPrompt: GithubReadmePrompt,
+    planRequirement: "FREE",
+  },
+  "bug-report": {
+    id: "bug-report",
+    name: "Bug Report Generator",
+    category: "DEVELOPER",
+    description: "Convert messy descriptions into structured bug reports.",
+    icon: "Bug",
+    inputSchema: BugReportInputSchema,
+    outputSchema: BugReportOutputSchema,
+    systemPrompt: BugReportPrompt,
     planRequirement: "FREE",
   },
 };

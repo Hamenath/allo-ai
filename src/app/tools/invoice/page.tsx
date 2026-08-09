@@ -47,20 +47,14 @@ export default function InvoiceGeneratorPage() {
   const [clientAddress, setClientAddress] = useState("");
 
   // Details
-  const [invoiceNumber, setInvoiceNumber] = useState(`INV-${Math.floor(Math.random() * 10000)}`);
-  const [invoiceDate, setInvoiceDate] = useState(new Date().toISOString().split('T')[0]);
+  const [invoiceNumber, setInvoiceNumber] = useState("");
+  const [invoiceDate, setInvoiceDate] = useState("");
   const [dueDate, setDueDate] = useState("");
   const [currency, setCurrency] = useState("$");
   const [notes, setNotes] = useState("Thank you for your business.");
 
   // Items
-  const [items, setItems] = useState<InvoiceItem[]>([
-    { id: Date.now().toString(), name: "", description: "", quantity: 1, unitPrice: 0, tax: 0, discount: 0 }
-  ]);
-
-  useEffect(() => {
-    fetchInvoices();
-  }, []);
+  const [items, setItems] = useState<InvoiceItem[]>([]);
 
   const fetchInvoices = async () => {
     try {
@@ -74,6 +68,13 @@ export default function InvoiceGeneratorPage() {
       setIsLoading(false);
     }
   };
+
+  useEffect(() => {
+    setInvoiceNumber(`INV-${Math.floor(Math.random() * 10000)}`);
+    setInvoiceDate(new Date().toISOString().split('T')[0]);
+    setItems([{ id: Date.now().toString(), name: "", description: "", quantity: 1, unitPrice: 0, tax: 0, discount: 0 }]);
+    fetchInvoices();
+  }, []);
 
   const addItem = () => {
     setItems([...items, { id: Date.now().toString(), name: "", description: "", quantity: 1, unitPrice: 0, tax: 0, discount: 0 }]);

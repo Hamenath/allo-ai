@@ -75,7 +75,7 @@ export default function HistoryPage() {
           </div>
           <h2 className="text-xl font-semibold">No history yet</h2>
           <p className="text-muted-foreground mt-2 mb-6 max-w-sm text-sm">
-            You haven't generated any AI results yet. Try using one of our tools to get started.
+            You haven&apos;t generated any AI results yet. Try using one of our tools to get started.
           </p>
           <Link href="/dashboard">
             <Button>Explore Tools</Button>

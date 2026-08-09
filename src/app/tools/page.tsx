@@ -21,6 +21,8 @@ const tools = [
   { id: "proposal", name: "Proposal Generator", category: "Business", icon: FileText, color: "text-amber-500", bg: "bg-amber-500/10", desc: "Draft structured and persuasive client proposals." },
   { id: "social-calendar", name: "Social Media Calendar", category: "Business", icon: Sparkles, color: "text-purple-500", bg: "bg-purple-500/10", desc: "Generate a month of tailored social media posts." },
   { id: "startup-validator", name: "Startup Idea Validator", category: "Business", icon: Code, color: "text-rose-500", bg: "bg-rose-500/10", desc: "Get critical AI analysis on your startup idea." },
+  { id: "github-readme", name: "GitHub README Generator", category: "Developer", icon: Code, color: "text-stone-500", bg: "bg-stone-500/10", desc: "Generate professional README.md for your projects." },
+  { id: "bug-report", name: "Bug Report Generator", category: "Developer", icon: Code, color: "text-red-500", bg: "bg-red-500/10", desc: "Convert messy descriptions into structured bug reports." },
 ];
 
 export default function ToolsDirectoryPage() {
