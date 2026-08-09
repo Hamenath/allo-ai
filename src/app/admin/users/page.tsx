@@ -46,6 +46,7 @@ export default function AdminUsersPage() {
       loadUsers();
     }, 300);
     return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, searchTerm, planFilter]);
 
   const handleToggleStatus = async (targetUserId: string, currentDisabled: boolean) => {

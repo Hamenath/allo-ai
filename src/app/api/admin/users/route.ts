@@ -23,7 +23,7 @@ export async function GET(req: Request) {
     }
 
     const snap = await query.limit(100).get();
-    let usersList: any[] = [];
+    const usersList: any[] = [];
 
     snap.forEach((docSnap: any) => {
       const d = docSnap.data();

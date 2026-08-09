@@ -65,6 +65,7 @@ export function NotificationBell() {
     loadData();
     const interval = setInterval(loadData, 30000); // Polling every 30s
     return () => clearInterval(interval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   const handleMarkAsRead = async (id: string) => {
