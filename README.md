@@ -14,7 +14,7 @@
   </p>
 
   <p>
-    <a href="https://alloai.in">🌐 alloai.in</a> &nbsp;|&nbsp;
+    <a href="https://vercel.com">🌐 Vercel Production Deployment</a> &nbsp;|&nbsp;
     <a href="docs/deployment.md">📦 Deploy</a> &nbsp;|&nbsp;
     <a href="docs/security-audit.md">🔐 Security</a> &nbsp;|&nbsp;
     <a href="CHANGELOG.md">📝 Changelog</a>
@@ -29,7 +29,8 @@
 
 **Target users:** Freelancers, job seekers, startup founders, developers, and business professionals in India.
 
-**Live at:** [https://alloai.in](https://alloai.in)
+**Production Deployment:** Hosted on Vercel (`https://<project-name>.vercel.app`).  
+*(Note: Custom domain `alloai.in` is not purchased yet — see [`docs/custom-domain-plan.md`](docs/custom-domain-plan.md) for future migration steps).*
 
 ---
 
@@ -207,7 +208,7 @@ ALLO is deployed to Vercel. See [`docs/deployment.md`](docs/deployment.md) for t
 **Quick summary:**
 1. Set all environment variables in Vercel project settings
 2. Deploy Firestore and Storage rules: `firebase deploy --only firestore:rules,storage:rules`
-3. Configure Razorpay webhook URL: `https://alloai.in/api/webhooks/razorpay`
+3. Configure Razorpay webhook URL: `https://<project-name>.vercel.app/api/webhooks/razorpay`
 4. Push to `main` — CI/CD handles the rest
 
 ---

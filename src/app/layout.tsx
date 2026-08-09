@@ -7,7 +7,7 @@ import { AuthProvider } from "@/context/AuthContext";
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 const outfit = Outfit({ subsets: ["latin"], variable: "--font-mono" });
 
-const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || "https://alloai.in";
+const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000");
 
 export const metadata: Metadata = {
   metadataBase: new URL(BASE_URL),

@@ -1,11 +1,13 @@
+const defaultAppUrl = process.env.NEXT_PUBLIC_APP_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000");
+
 export const LEGAL_CONFIG = {
   appName: "ALLO",
   brandName: "ALLO",
-  domain: "alloai.in",
-  websiteUrl: process.env.NEXT_PUBLIC_APP_URL || "https://alloai.in",
-  supportEmail: process.env.NEXT_PUBLIC_SUPPORT_EMAIL || "support@alloai.in",
-  privacyEmail: process.env.NEXT_PUBLIC_PRIVACY_EMAIL || "privacy@alloai.in",
-  legalEmail: process.env.NEXT_PUBLIC_LEGAL_EMAIL || "legal@alloai.in",
+  domain: typeof window !== "undefined" ? window.location.hostname : (process.env.NEXT_PUBLIC_APP_URL ? new URL(process.env.NEXT_PUBLIC_APP_URL).hostname : "localhost"),
+  websiteUrl: defaultAppUrl,
+  supportEmail: process.env.NEXT_PUBLIC_SUPPORT_EMAIL || "support@allo.ai",
+  privacyEmail: process.env.NEXT_PUBLIC_PRIVACY_EMAIL || "privacy@allo.ai",
+  legalEmail: process.env.NEXT_PUBLIC_LEGAL_EMAIL || "legal@allo.ai",
   termsVersion: "2026-01",
   privacyVersion: "2026-01",
   refundVersion: "2026-01",

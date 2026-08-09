@@ -1,6 +1,10 @@
 # ALLO — Production Operations Runbook
 
-This runbook documents incident response protocols, operational procedures, and troubleshooting steps for platform incidents on **ALLO** (`https://alloai.in`).
+This runbook documents incident response protocols, operational procedures, and troubleshooting steps for platform incidents on **ALLO** (`https://<project-name>.vercel.app`).
+
+> **Domain Note:** Custom domain `alloai.in` is **NOT PURCHASED YET**.  
+> Primary deployment target is Vercel (`https://<project-name>.vercel.app`).  
+> When `alloai.in` is purchased, follow [`docs/custom-domain-plan.md`](custom-domain-plan.md).
 
 ---
 
@@ -41,5 +45,5 @@ This runbook documents incident response protocols, operational procedures, and 
 ---
 
 ## 2. Health Monitoring
-- Public Uptime Health Check Endpoint: `GET https://alloai.in/api/health`
+- Public Uptime Health Check Endpoint: `GET https://<project-name>.vercel.app/api/health`
 - Expected Payload: `{ "status": "ok", "service": "ALLO AI Workspace" }`

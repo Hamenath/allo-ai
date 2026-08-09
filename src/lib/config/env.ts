@@ -50,9 +50,11 @@ export function validateEnvironment(isProduction = process.env.NODE_ENV === "pro
   };
 }
 
+const defaultAppUrl = process.env.NEXT_PUBLIC_APP_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000");
+
 export const APP_CONFIG = {
   appName: "ALLO",
-  canonicalUrl: "https://alloai.in",
-  appUrl: process.env.NEXT_PUBLIC_APP_URL || "https://alloai.in",
+  canonicalUrl: defaultAppUrl,
+  appUrl: defaultAppUrl,
   isProduction: process.env.NODE_ENV === "production",
 };

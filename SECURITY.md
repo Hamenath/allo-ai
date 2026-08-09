@@ -18,7 +18,7 @@ If you discover a security vulnerability in ALLO, please report it privately so 
 
 ### How to Report
 
-Send a detailed email to: **security@alloai.in**
+Send a detailed email to: **security@allo.ai**
 
 Include:
 - A clear description of the vulnerability
@@ -72,6 +72,6 @@ The following are generally **out of scope**:
 
 ## Contact
 
-**Security:** security@alloai.in  
-**Privacy:** privacy@alloai.in  
-**General Support:** support@alloai.in
+**Security:** security@allo.ai  
+**Privacy:** privacy@allo.ai  
+**General Support:** support@allo.ai

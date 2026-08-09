@@ -2,7 +2,9 @@
 
 Use this checklist before every production release.
 
-> Complete ALL items before creating a release tag or deploying to production.
+> **Note on Production Domain:** Custom domain `alloai.in` is **NOT PURCHASED YET**.  
+> Primary deployment target is Vercel (`https://<project-name>.vercel.app`).  
+> When `alloai.in` is purchased, follow [`docs/custom-domain-plan.md`](custom-domain-plan.md).
 
 ---
 
@@ -10,7 +12,7 @@ Use this checklist before every production release.
 
 ### Code Quality
 - [ ] `npm run lint` — 0 errors
-- [ ] `npx tsc --noEmit` — 0 TypeScript errors
+- [ ] `npm run typecheck` — 0 TypeScript errors
 - [ ] `npm test` — all tests pass
 - [ ] `npm run build` — production build succeeds with 0 errors
 
@@ -32,7 +34,7 @@ Use this checklist before every production release.
   - [ ] `RESEND_API_KEY`
   - [ ] `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN`
   - [ ] `ADMIN_EMAIL`
-  - [ ] `NEXT_PUBLIC_APP_URL=https://alloai.in`
+  - [ ] `NEXT_PUBLIC_APP_URL=https://<project-name>.vercel.app`
 - [ ] `.env.example` is up-to-date with all variable names
 
 ### Database
@@ -41,7 +43,7 @@ Use this checklist before every production release.
 - [ ] Admin account has correct `role: "admin"` in Firestore or `ADMIN_EMAIL` is set
 
 ### Billing
-- [ ] Razorpay webhook URL configured: `https://alloai.in/api/webhooks/razorpay`
+- [ ] Razorpay webhook URL configured: `https://<project-name>.vercel.app/api/webhooks/razorpay`
 - [ ] Webhook events active: `payment.captured`, `subscription.charged`, `subscription.cancelled`, `subscription.halted`, `order.paid`
 - [ ] Webhook secret matches `RAZORPAY_WEBHOOK_SECRET`
 - [ ] Tested a payment flow end-to-end in staging
@@ -57,9 +59,8 @@ Use this checklist before every production release.
 - [ ] Test email sent successfully
 
 ### Domain & Hosting
-- [ ] `https://alloai.in` resolves correctly
+- [ ] Vercel URL (`https://<project-name>.vercel.app`) resolves correctly
 - [ ] HTTPS is enforced (Vercel handles this automatically)
-- [ ] `www.alloai.in` redirects to `alloai.in`
 - [ ] HSTS header present in production response
 
 ### Monitoring & Observability
@@ -82,7 +83,7 @@ git checkout main
 git pull origin main
 
 # 2. Run full verification
-npx tsc --noEmit
+npm run typecheck
 npm run lint
 npm test
 npm run build
@@ -97,7 +98,7 @@ git push origin v1.0.0
 ## Post-Release Verification
 
 - [ ] Vercel deployment succeeded (check Vercel dashboard)
-- [ ] `https://alloai.in` loads correctly
+- [ ] Vercel URL loads correctly
 - [ ] Login and signup work
 - [ ] At least one AI generation completes successfully
 - [ ] Billing flow initiates correctly
