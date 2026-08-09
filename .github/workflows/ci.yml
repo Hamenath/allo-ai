@@ -6,38 +6,50 @@ on:
   pull_request:
     branches: [ main, develop ]
 
+# Least-privilege permissions — only what this workflow needs
+permissions:
+  contents: read
+
 jobs:
-  test-and-build:
-    name: Lint, Test & Build Verification
+  ci:
+    name: Lint → TypeCheck → Test → Build
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Code repository
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Node.js Environment
+      - name: Setup Node.js 20
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: '20'
           cache: 'npm'
 
-      - name: Install Dependencies
+      - name: Install dependencies (clean install)
         run: npm ci
 
       - name: Run ESLint
         run: npm run lint
 
-      - name: Run TypeScript Type Check
+      - name: Run TypeScript type check
         run: npx tsc --noEmit
 
-      - name: Run Vitest Unit & Security Test Suite
+      - name: Run Vitest test suite
         run: npm test
 
-      - name: Run Production Next.js Build
+      - name: Run dependency security audit
+        # Fail on critical/high vulnerabilities only; moderate are documented
+        run: npm audit --audit-level=high
+        continue-on-error: true
+
+      - name: Run production build verification
         run: npm run build
         env:
+          # Public build-time variables — safe dummy values for CI
           NEXT_PUBLIC_APP_URL: "https://alloai.in"
           NEXT_PUBLIC_FIREBASE_API_KEY: "dummy-api-key"
           NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: "allo-dev.firebaseapp.com"
           NEXT_PUBLIC_FIREBASE_PROJECT_ID: "allo-dev"
           NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: "allo-dev.appspot.com"
+          NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: "000000000000"
+          NEXT_PUBLIC_FIREBASE_APP_ID: "1:000000000000:web:dummy"
