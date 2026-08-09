@@ -366,7 +366,7 @@ ${result.followUps?.map((p: string) => "- " + p).join("\\n")}
                           ) : (
                             <>
                               {item.owner && <Badge variant="secondary">{item.owner}</Badge>}
-                              {item.deadline && <Badge variant="outline" className="text-amber-600 dark:text-amber-400 border-amber-500/30 bg-amber-500/10">{item.deadline}</Badge>}
+                              {item.deadline && <Badge variant="outline" className="text-amber-500 border-amber-500/30 bg-amber-500/10">{item.deadline}</Badge>}
                             </>
                           )}
                         </div>

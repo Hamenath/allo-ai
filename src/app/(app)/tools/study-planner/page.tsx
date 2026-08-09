@@ -403,7 +403,7 @@ export default function StudyPlannerPage() {
                       <TabsContent value="revision" className="mt-0 space-y-6 outline-none">
                         <div className="space-y-6">
                           <div className="bg-amber-500/10 border border-amber-500/30 p-6 rounded-xl">
-                            <h3 className="font-semibold text-lg text-amber-700 dark:text-amber-400 mb-3">Revision Strategy</h3>
+                            <h3 className="font-semibold text-lg text-amber-500 mb-3">Revision Strategy</h3>
                             <p className="text-foreground leading-relaxed">{result.revisionSchedule}</p>
                           </div>
 
