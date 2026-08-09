@@ -120,6 +120,16 @@ export default function SignupPage() {
             <Button type="submit" className="w-full" disabled={loading}>
               {loading ? "Creating account..." : "Sign up"}
             </Button>
+            <p className="text-xs text-center text-muted-foreground pt-1">
+              By creating an account, you agree to our{" "}
+              <Link href="/terms" target="_blank" className="underline hover:text-foreground">
+                Terms of Service
+              </Link>{" "}
+              and acknowledge our{" "}
+              <Link href="/privacy" target="_blank" className="underline hover:text-foreground">
+                Privacy Policy
+              </Link>.
+            </p>
           </form>
         </CardContent>
         <CardFooter className="flex justify-center">

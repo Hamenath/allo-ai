@@ -1,0 +1,20 @@
+export const LEGAL_CONFIG = {
+  appName: "ALLO",
+  brandName: "ALLO",
+  domain: "alloai.in",
+  websiteUrl: process.env.NEXT_PUBLIC_APP_URL || "https://alloai.in",
+  supportEmail: process.env.NEXT_PUBLIC_SUPPORT_EMAIL || "support@alloai.in",
+  privacyEmail: process.env.NEXT_PUBLIC_PRIVACY_EMAIL || "privacy@alloai.in",
+  legalEmail: process.env.NEXT_PUBLIC_LEGAL_EMAIL || "legal@alloai.in",
+  termsVersion: "2026-01",
+  privacyVersion: "2026-01",
+  refundVersion: "2026-01",
+  lastUpdated: "August 9, 2026",
+  providers: {
+    authentication: "Firebase Auth",
+    database: "Google Cloud Firestore",
+    aiEngine: "Google Gemini AI",
+    paymentGateway: "Razorpay (India)",
+    emailProvider: "Resend",
+  },
+};
