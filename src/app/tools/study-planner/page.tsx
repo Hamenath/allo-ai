@@ -9,12 +9,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Loader2, GraduationCap, ArrowLeft, AlertCircle, Calendar, CheckSquare, ListTodo, Heart, RefreshCw, Clock } from "lucide-react";
+import { Loader2, GraduationCap, ArrowLeft, AlertCircle, Heart, RefreshCw, CheckCircle2 } from "lucide-react";
 import Link from "next/link";
 import { auth } from "@/lib/firebase";
-import { toggleFavorite } from "@/lib/db/generations";
+import { toggleFavorite, updateGeneration } from "@/lib/db/generations";
+import { Badge } from "@/components/ui/badge";
 
 export default function StudyPlannerPage() {
   const [result, setResult] = useState<any>(null);
@@ -30,9 +31,15 @@ export default function StudyPlannerPage() {
       goal: "",
       currentLevel: "Beginner",
       availableHours: 2,
+      daysPerWeek: 5,
       deadline: "",
       learningStyle: "Mixed",
       topics: "",
+      currentStrengths: "",
+      currentWeaknesses: "",
+      examName: "",
+      examDate: "",
+      existingResources: "",
     },
   });
 
@@ -40,10 +47,10 @@ export default function StudyPlannerPage() {
     setIsGenerating(true);
     setError(null);
     
-    // Ensure availableHours is a number
     const processedData = {
       ...data,
-      availableHours: Number(data.availableHours)
+      availableHours: Number(data.availableHours),
+      daysPerWeek: Number(data.daysPerWeek),
     };
     
     try {
@@ -69,7 +76,13 @@ export default function StudyPlannerPage() {
         throw new Error(resData.error?.message || "Failed to generate study plan");
       }
       
-      setResult(resData.data.result);
+      // Initialize completed checklist map if not exists
+      const initialResult = resData.data.result;
+      if (!initialResult.completedTasks) {
+        initialResult.completedTasks = {};
+      }
+
+      setResult(initialResult);
       setGenerationId(resData.data.id);
       setIsFavorite(false);
       
@@ -90,270 +103,335 @@ export default function StudyPlannerPage() {
     }
   };
 
+  const toggleTaskCompletion = async (taskIdx: number) => {
+    if (!result || !generationId) return;
+    
+    const newCompletedTasks = { ...result.completedTasks };
+    newCompletedTasks[taskIdx] = !newCompletedTasks[taskIdx];
+    
+    const newResult = { ...result, completedTasks: newCompletedTasks };
+    setResult(newResult);
+    
+    // Save to Firestore seamlessly
+    try {
+      await updateGeneration(generationId, { output: newResult });
+    } catch (e) {
+      console.error("Failed to save progress", e);
+    }
+  };
+
+  const handleRegenerate = () => {
+    form.handleSubmit(onSubmit)();
+  };
+
   return (
     <div className="container mx-auto max-w-7xl px-4 py-8">
-      <div className="mb-8 flex items-center justify-between">
-        <div>
-          <Link href="/dashboard" className="text-muted-foreground hover:text-foreground mb-4 flex items-center text-sm transition-colors">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Dashboard
-          </Link>
-          <h1 className="text-3xl font-bold tracking-tight">AI Study Planner</h1>
-          <p className="text-muted-foreground mt-2">
-            Create a highly tailored study strategy, daily schedule, and progress checklist.
-          </p>
+      <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex items-center">
+          <Button variant="ghost" size="icon" asChild className="mr-4">
+            <Link href="/tools"><ArrowLeft className="h-4 w-4" /></Link>
+          </Button>
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-primary/10 text-primary rounded-lg">
+              <GraduationCap className="h-6 w-6" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold tracking-tight">Study Planner</h1>
+              <p className="text-muted-foreground text-sm">Create personalized study plans and schedules.</p>
+            </div>
+          </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-8 lg:grid-cols-12">
-        {/* Left Column: Input Form */}
-        <div className="lg:col-span-5 xl:col-span-4">
-          <Card className="h-full border-border/50 shadow-sm">
-            <CardHeader>
-              <CardTitle className="flex items-center text-lg">
-                <GraduationCap className="mr-2 h-5 w-5 text-primary" />
-                Study Requirements
-              </CardTitle>
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 min-h-200">
+        {/* Form Column */}
+        <div className="lg:col-span-4 h-full">
+          <Card className="flex flex-col h-full border-border/50 shadow-sm overflow-hidden">
+            <CardHeader className="bg-muted/30 border-b pb-4">
+              <CardTitle className="text-lg">Study Requirements</CardTitle>
             </CardHeader>
-            <CardContent>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <CardContent className="p-0 flex-1 overflow-auto">
+              <form id="study-form" onSubmit={form.handleSubmit(onSubmit)} className="p-6 space-y-5">
                 
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Subject / Topic</label>
-                  <Input placeholder="e.g., AWS Certified Solutions Architect, Calculus II" {...form.register("subject")} disabled={isGenerating} />
-                  {form.formState.errors.subject && <p className="text-xs text-destructive">{form.formState.errors.subject.message}</p>}
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Ultimate Goal</label>
-                  <Input placeholder="e.g., Pass the exam with 900+, Get a junior dev job" {...form.register("goal")} disabled={isGenerating} />
-                  {form.formState.errors.goal && <p className="text-xs text-destructive">{form.formState.errors.goal.message}</p>}
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Current Level</label>
-                    <Select disabled={isGenerating} onValueChange={(val: any) => form.setValue("currentLevel", val)} defaultValue={form.getValues("currentLevel")}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select level" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Beginner">Beginner</SelectItem>
-                        <SelectItem value="Intermediate">Intermediate</SelectItem>
-                        <SelectItem value="Advanced">Advanced</SelectItem>
-                        <SelectItem value="Expert">Expert</SelectItem>
-                      </SelectContent>
-                    </Select>
+                <div className="space-y-4">
+                  <div>
+                    <label className="text-sm font-medium mb-1.5 block">Subject / Topic *</label>
+                    <Input {...form.register("subject")} placeholder="e.g. AWS Solutions Architect" className="bg-background" />
+                    {form.formState.errors.subject && <p className="text-sm text-destructive mt-1">{form.formState.errors.subject.message}</p>}
                   </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Learning Style</label>
-                    <Select disabled={isGenerating} onValueChange={(val: any) => form.setValue("learningStyle", val)} defaultValue={form.getValues("learningStyle")}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select style" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Visual">Visual</SelectItem>
-                        <SelectItem value="Auditory">Auditory</SelectItem>
-                        <SelectItem value="Reading/Writing">Reading/Writing</SelectItem>
-                        <SelectItem value="Kinesthetic">Kinesthetic</SelectItem>
-                        <SelectItem value="Mixed">Mixed</SelectItem>
-                      </SelectContent>
-                    </Select>
+                  
+                  <div>
+                    <label className="text-sm font-medium mb-1.5 block">Primary Goal *</label>
+                    <Input {...form.register("goal")} placeholder="e.g. Pass the exam in 2 months" className="bg-background" />
+                    {form.formState.errors.goal && <p className="text-sm text-destructive mt-1">{form.formState.errors.goal.message}</p>}
                   </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-sm font-medium mb-1.5 block">Current Level</label>
+                      <Select onValueChange={(val) => form.setValue("currentLevel", val as any)} defaultValue={form.getValues("currentLevel")}>
+                        <SelectTrigger className="bg-background"><SelectValue placeholder="Select level" /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Beginner">Beginner</SelectItem>
+                          <SelectItem value="Intermediate">Intermediate</SelectItem>
+                          <SelectItem value="Advanced">Advanced</SelectItem>
+                          <SelectItem value="Expert">Expert</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium mb-1.5 block">Learning Style</label>
+                      <Select onValueChange={(val) => form.setValue("learningStyle", val as any)} defaultValue={form.getValues("learningStyle")}>
+                        <SelectTrigger className="bg-background"><SelectValue placeholder="Select style" /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Mixed">Mixed</SelectItem>
+                          <SelectItem value="Visual">Visual</SelectItem>
+                          <SelectItem value="Auditory">Auditory</SelectItem>
+                          <SelectItem value="Reading/Writing">Reading/Writing</SelectItem>
+                          <SelectItem value="Kinesthetic">Kinesthetic</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-sm font-medium mb-1.5 block">Hours / Day *</label>
+                      <Input type="number" min="1" max="16" {...form.register("availableHours")} className="bg-background" />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium mb-1.5 block">Days / Week *</label>
+                      <Input type="number" min="1" max="7" {...form.register("daysPerWeek")} className="bg-background" />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="text-sm font-medium mb-1.5 block">Deadline / Timeframe *</label>
+                    <Input {...form.register("deadline")} placeholder="e.g. 8 weeks" className="bg-background" />
+                  </div>
+                  
+                  <div className="border-t pt-4 mt-4">
+                    <p className="text-sm font-medium text-muted-foreground mb-3">Optional Details</p>
+                    
+                    <div className="grid grid-cols-2 gap-4 mb-4">
+                      <div>
+                        <label className="text-xs font-medium mb-1.5 block">Exam Name</label>
+                        <Input {...form.register("examName")} className="bg-background h-8 text-sm" />
+                      </div>
+                      <div>
+                        <label className="text-xs font-medium mb-1.5 block">Exam Date</label>
+                        <Input type="date" {...form.register("examDate")} className="bg-background h-8 text-sm" />
+                      </div>
+                    </div>
+
+                    <div className="space-y-4">
+                      <div>
+                        <label className="text-xs font-medium mb-1.5 block">Topics to Cover</label>
+                        <Textarea {...form.register("topics")} placeholder="Specific topics..." className="h-16 text-sm bg-background" />
+                      </div>
+                      <div>
+                        <label className="text-xs font-medium mb-1.5 block">Current Strengths</label>
+                        <Input {...form.register("currentStrengths")} placeholder="e.g. Good at networking" className="h-8 text-sm bg-background" />
+                      </div>
+                      <div>
+                        <label className="text-xs font-medium mb-1.5 block">Current Weaknesses</label>
+                        <Input {...form.register("currentWeaknesses")} placeholder="e.g. Bad at databases" className="h-8 text-sm bg-background" />
+                      </div>
+                      <div>
+                        <label className="text-xs font-medium mb-1.5 block">Existing Resources</label>
+                        <Textarea {...form.register("existingResources")} placeholder="Books or courses you have..." className="h-16 text-sm bg-background" />
+                      </div>
+                    </div>
+                  </div>
+
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Hrs/Day</label>
-                    <Input type="number" min="1" max="16" {...form.register("availableHours")} disabled={isGenerating} />
-                    {form.formState.errors.availableHours && <p className="text-xs text-destructive">{form.formState.errors.availableHours.message}</p>}
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Deadline / Timeframe</label>
-                    <Input placeholder="e.g., 3 months, Next Friday" {...form.register("deadline")} disabled={isGenerating} />
-                    {form.formState.errors.deadline && <p className="text-xs text-destructive">{form.formState.errors.deadline.message}</p>}
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Specific Topics (Optional)</label>
-                  <Textarea placeholder="List specific topics you want to make sure are covered..." className="h-20 resize-none" {...form.register("topics")} disabled={isGenerating} />
-                </div>
-
-                <Button type="submit" className="w-full mt-2" disabled={isGenerating}>
-                  {isGenerating ? (
-                    <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Analyzing...</>
-                  ) : (
-                    <><RefreshCw className="mr-2 h-4 w-4" /> Create Study Plan</>
-                  )}
-                </Button>
-                
                 {error && (
-                  <div className="flex items-center space-x-2 rounded-md bg-destructive/10 p-3 text-sm text-destructive">
-                    <AlertCircle className="h-4 w-4" /><span>{error}</span>
+                  <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-md text-destructive flex items-start text-sm">
+                    <AlertCircle className="h-4 w-4 mr-2 mt-0.5 shrink-0" />
+                    <p>{error}</p>
                   </div>
                 )}
               </form>
             </CardContent>
+            <CardFooter className="bg-muted/30 border-t p-4 flex justify-end">
+              <Button type="submit" form="study-form" disabled={isGenerating} className="w-full">
+                {isGenerating ? (
+                  <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Generating Plan...</>
+                ) : (
+                  "Generate Plan"
+                )}
+              </Button>
+            </CardFooter>
           </Card>
         </div>
 
-        {/* Right Column: Results */}
-        <div className="lg:col-span-7 xl:col-span-8">
-          {!result && !isGenerating ? (
-            <Card className="flex h-full min-h-125 flex-col items-center justify-center border-dashed border-border/50 text-center shadow-none p-6">
-              <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-primary/10 mb-4">
-                <GraduationCap className="h-10 w-10 text-primary" />
-              </div>
-              <h3 className="text-xl font-semibold">No Plan Generated</h3>
-              <p className="text-muted-foreground mt-2 max-w-sm">
-                Enter your study goals and constraints to generate a comprehensive learning schedule.
-              </p>
-            </Card>
-          ) : isGenerating ? (
-            <Card className="flex h-full min-h-125 flex-col items-center justify-center border-border/50 shadow-sm">
-              <Loader2 className="h-12 w-12 animate-spin text-primary mb-4" />
-              <h3 className="text-xl font-medium">Creating your master plan...</h3>
-              <p className="text-muted-foreground mt-2">Allocating hours and structuring topics...</p>
-            </Card>
-          ) : result ? (
-            <Card className="h-full border-border/50 shadow-sm flex flex-col">
-              <CardHeader className="border-b pb-4 shrink-0">
-                <div className="flex items-center justify-between">
-                  <CardTitle>Your Custom Study Plan</CardTitle>
-                  <Button variant={isFavorite ? "default" : "outline"} size="sm" onClick={handleFavorite}>
-                    <Heart className={`mr-2 h-4 w-4 ${isFavorite ? "fill-current" : ""}`} /> Favorite
+        {/* Result Column */}
+        <div className="lg:col-span-8 h-full">
+          <Card className="flex flex-col h-full border-border/50 shadow-sm overflow-hidden bg-muted/10 relative">
+            <CardHeader className="border-b pb-4 bg-background flex flex-row items-center justify-between sticky top-0 z-10">
+              <CardTitle className="text-lg">Study Plan Workspace</CardTitle>
+              {result && (
+                <div className="flex gap-2">
+                  <Button variant="outline" size="sm" onClick={handleFavorite}>
+                    <Heart className={`mr-2 h-4 w-4 ${isFavorite ? 'fill-red-500 text-red-500' : ''}`} /> 
+                    {isFavorite ? 'Saved' : 'Favorite'}
+                  </Button>
+                  <Button variant="default" size="sm" onClick={handleRegenerate}>
+                    <RefreshCw className="mr-2 h-4 w-4" /> Retry
                   </Button>
                 </div>
-              </CardHeader>
-              <CardContent className="pt-6 flex-1 overflow-auto">
-                <Tabs defaultValue="strategy" className="w-full">
-                  <TabsList className="mb-6 flex flex-wrap h-auto">
-                    <TabsTrigger value="strategy">Strategy</TabsTrigger>
-                    <TabsTrigger value="schedule">Schedule</TabsTrigger>
-                    <TabsTrigger value="topics">Topics</TabsTrigger>
-                    <TabsTrigger value="tasks">Checklist</TabsTrigger>
-                  </TabsList>
-                  
-                  <TabsContent value="strategy" className="space-y-6">
-                    <div className="bg-primary/5 rounded-lg p-6 border border-primary/20">
-                      <h3 className="text-lg font-semibold flex items-center mb-2">
-                        <GraduationCap className="mr-2 h-5 w-5 text-primary" /> Overall Strategy
-                      </h3>
-                      <p className="text-sm leading-relaxed">{result.overallStrategy}</p>
+              )}
+            </CardHeader>
+            <CardContent className="p-0 flex-1 overflow-auto bg-muted/10">
+              {!result && !isGenerating ? (
+                <div className="flex flex-col items-center justify-center h-full text-muted-foreground p-12 text-center min-h-[500px]">
+                  <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mb-4">
+                    <GraduationCap className="h-8 w-8 opacity-50" />
+                  </div>
+                  <p>Fill out your study requirements and click Generate to create your personalized plan.</p>
+                </div>
+              ) : isGenerating ? (
+                <div className="flex flex-col items-center justify-center h-full text-muted-foreground p-12 min-h-[500px]">
+                  <Loader2 className="h-12 w-12 animate-spin mb-4 text-primary" />
+                  <p className="animate-pulse">Building your perfect study plan...</p>
+                </div>
+              ) : result ? (
+                <div className="p-0">
+                  <Tabs defaultValue="overview" className="flex flex-col h-full">
+                    <div className="bg-background border-b px-6 py-2 sticky top-0 z-10">
+                      <TabsList className="w-full flex">
+                        <TabsTrigger value="overview" className="flex-1">Overview</TabsTrigger>
+                        <TabsTrigger value="weekly" className="flex-1">Weekly Plan</TabsTrigger>
+                        <TabsTrigger value="daily" className="flex-1">Daily Plan</TabsTrigger>
+                        <TabsTrigger value="progress" className="flex-1">Progress</TabsTrigger>
+                        <TabsTrigger value="revision" className="flex-1">Revision</TabsTrigger>
+                      </TabsList>
                     </div>
 
-                    <div className="bg-muted/30 rounded-lg p-6 border">
-                      <h3 className="text-lg font-semibold flex items-center mb-4">
-                        <ListTodo className="mr-2 h-5 w-5" /> Weekly Goals
-                      </h3>
-                      <ul className="space-y-3">
-                        {result.weeklyGoals.map((goal: string, idx: number) => (
-                          <li key={idx} className="flex items-start">
-                            <div className="mr-3 mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary/20 text-xs font-medium text-primary">
-                              {idx + 1}
-                            </div>
-                            <span className="text-sm">{goal}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-
-                    <div className="bg-muted/30 rounded-lg p-6 border">
-                      <h3 className="text-lg font-semibold mb-2">Revision Strategy</h3>
-                      <p className="text-sm leading-relaxed">{result.revisionSchedule}</p>
-                    </div>
-                  </TabsContent>
-                  
-                  <TabsContent value="schedule">
-                    <div className="space-y-4">
-                      <h3 className="text-lg font-semibold flex items-center mb-4">
-                        <Calendar className="mr-2 h-5 w-5" /> Daily Routine
-                      </h3>
-                      <div className="grid gap-4 sm:grid-cols-2">
-                        {result.dailySchedule.map((block: any, idx: number) => (
-                          <div key={idx} className="border rounded-lg p-4 bg-card shadow-sm flex flex-col">
-                            <div className="flex items-center text-sm font-semibold text-primary mb-2">
-                              <Clock className="h-4 w-4 mr-2" /> {block.timeBlock}
-                            </div>
-                            <h4 className="font-medium text-foreground mb-1">{block.activity}</h4>
-                            <p className="text-sm text-muted-foreground mt-auto pt-2 border-t">{block.focus}</p>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </TabsContent>
-
-                  <TabsContent value="topics">
-                    <div className="space-y-4">
-                      <h3 className="text-lg font-semibold flex items-center mb-4">
-                        <ListTodo className="mr-2 h-5 w-5" /> Topic Breakdown
-                      </h3>
-                      <div className="rounded-md border overflow-hidden">
-                        <table className="w-full text-sm text-left">
-                          <thead className="bg-muted/50 text-xs uppercase text-muted-foreground">
-                            <tr>
-                              <th className="px-4 py-3">Topic</th>
-                              <th className="px-4 py-3 text-center">Difficulty</th>
-                              <th className="px-4 py-3 text-right">Est. Hours</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {result.topicsBreakdown.map((t: any, idx: number) => (
-                              <tr key={idx} className="border-b last:border-0 hover:bg-muted/20">
-                                <td className="px-4 py-3 font-medium">{t.topic}</td>
-                                <td className="px-4 py-3 text-center">
-                                  <span className={`px-2 py-1 rounded-full text-xs ${
-                                    t.difficulty.toLowerCase() === 'hard' ? 'bg-red-500/10 text-red-600' :
-                                    t.difficulty.toLowerCase() === 'medium' ? 'bg-yellow-500/10 text-yellow-600' :
-                                    'bg-green-500/10 text-green-600'
-                                  }`}>
-                                    {t.difficulty}
-                                  </span>
-                                </td>
-                                <td className="px-4 py-3 text-right font-medium">{t.estimatedHours}h</td>
-                              </tr>
+                    <div className="p-6">
+                      <TabsContent value="overview" className="mt-0 space-y-6 outline-none">
+                        <div className="bg-primary/5 border border-primary/20 p-6 rounded-xl">
+                          <h3 className="font-semibold text-lg text-primary mb-3">Overall Strategy</h3>
+                          <p className="text-foreground leading-relaxed">{result.overallStrategy}</p>
+                        </div>
+                        
+                        <div className="space-y-4">
+                          <h3 className="font-semibold text-lg border-b pb-2">Topic Sequence</h3>
+                          <div className="grid gap-2">
+                            {result.topicSequence?.map((topic: string, idx: number) => (
+                              <div key={idx} className="flex items-center bg-background p-3 rounded border shadow-sm">
+                                <div className="h-6 w-6 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xs font-bold mr-3">{idx + 1}</div>
+                                <span className="font-medium text-sm">{topic}</span>
+                              </div>
                             ))}
-                          </tbody>
-                        </table>
-                      </div>
-                    </div>
-                  </TabsContent>
-
-                  <TabsContent value="tasks" className="space-y-6">
-                    <div className="bg-card rounded-lg p-6 border shadow-sm">
-                      <h3 className="text-lg font-semibold flex items-center mb-4">
-                        <CheckSquare className="mr-2 h-5 w-5 text-primary" /> Practice Tasks
-                      </h3>
-                      <div className="space-y-3">
-                        {result.practiceTasks.map((task: string, idx: number) => (
-                          <div key={idx} className="flex items-start gap-3 p-3 rounded-md hover:bg-muted/50 border border-transparent hover:border-border transition-colors">
-                            <input type="checkbox" className="mt-1 h-4 w-4 rounded border-muted-foreground/30 text-primary focus:ring-primary cursor-pointer" />
-                            <span className="text-sm">{task}</span>
                           </div>
-                        ))}
-                      </div>
-                    </div>
+                        </div>
+                      </TabsContent>
 
-                    <div className="bg-card rounded-lg p-6 border shadow-sm">
-                      <h3 className="text-lg font-semibold flex items-center mb-4">
-                        <CheckSquare className="mr-2 h-5 w-5 text-primary" /> Milestone Checklist
-                      </h3>
-                      <div className="space-y-3">
-                        {result.progressChecklist.map((item: string, idx: number) => (
-                          <div key={idx} className="flex items-start gap-3 p-3 rounded-md hover:bg-muted/50 border border-transparent hover:border-border transition-colors">
-                            <input type="checkbox" className="mt-1 h-4 w-4 rounded border-muted-foreground/30 text-primary focus:ring-primary cursor-pointer" />
-                            <span className="text-sm">{item}</span>
+                      <TabsContent value="weekly" className="mt-0 space-y-6 outline-none">
+                        <div className="space-y-4">
+                          <h3 className="font-semibold text-lg border-b pb-2">Weekly Goals</h3>
+                          <ul className="space-y-3">
+                            {result.weeklyGoals?.map((goal: string, idx: number) => (
+                              <li key={idx} className="flex items-start bg-background p-4 rounded-lg border shadow-sm">
+                                <CheckCircle2 className="h-5 w-5 mr-3 text-primary shrink-0 mt-0.5" />
+                                <span className="text-foreground">{goal}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      </TabsContent>
+
+                      <TabsContent value="daily" className="mt-0 space-y-6 outline-none">
+                        <div className="space-y-6">
+                          <h3 className="font-semibold text-lg border-b pb-2">Typical Daily Routine</h3>
+                          
+                          <div className="grid grid-cols-1 gap-4">
+                            {result.dailyTasks?.map((dayObj: any, idx: number) => (
+                              <Card key={idx} className="shadow-sm">
+                                <CardHeader className="bg-muted/50 py-3">
+                                  <CardTitle className="text-base">{dayObj.day}</CardTitle>
+                                </CardHeader>
+                                <CardContent className="p-4">
+                                  <ul className="space-y-2">
+                                    {dayObj.tasks?.map((task: string, taskIdx: number) => (
+                                      <li key={taskIdx} className="flex items-start text-sm">
+                                        <div className="h-1.5 w-1.5 rounded-full bg-primary mt-2 mr-2 shrink-0" />
+                                        <span className="text-foreground">{task}</span>
+                                      </li>
+                                    ))}
+                                  </ul>
+                                </CardContent>
+                              </Card>
+                            ))}
                           </div>
-                        ))}
-                      </div>
-                    </div>
-                  </TabsContent>
+                        </div>
+                      </TabsContent>
 
-                </Tabs>
-              </CardContent>
-            </Card>
-          ) : null}
+                      <TabsContent value="progress" className="mt-0 space-y-6 outline-none">
+                        <div className="space-y-4">
+                          <div className="flex items-center justify-between border-b pb-2">
+                            <h3 className="font-semibold text-lg">Master Checklist</h3>
+                            <span className="text-sm text-muted-foreground">
+                              {Object.values(result.completedTasks || {}).filter(Boolean).length} / {result.progressChecklist?.length || 0} completed
+                            </span>
+                          </div>
+                          
+                          <div className="grid gap-3">
+                            {result.progressChecklist?.map((item: string, idx: number) => {
+                              const isChecked = !!result.completedTasks?.[idx];
+                              return (
+                                <div 
+                                  key={idx} 
+                                  className={`flex items-center p-4 rounded-lg border shadow-sm cursor-pointer transition-colors ${isChecked ? 'bg-primary/5 border-primary/20' : 'bg-background hover:bg-muted/50'}`}
+                                  onClick={() => toggleTaskCompletion(idx)}
+                                >
+                                  <div className={`h-5 w-5 rounded border flex items-center justify-center mr-4 transition-colors ${isChecked ? 'bg-primary border-primary text-primary-foreground' : 'border-input'}`}>
+                                    {isChecked && <CheckCircle2 className="h-3 w-3" />}
+                                  </div>
+                                  <span className={`text-sm ${isChecked ? 'text-muted-foreground line-through' : 'font-medium'}`}>
+                                    {item}
+                                  </span>
+                                </div>
+                              )
+                            })}
+                          </div>
+                        </div>
+                      </TabsContent>
+
+                      <TabsContent value="revision" className="mt-0 space-y-6 outline-none">
+                        <div className="space-y-6">
+                          <div className="bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 p-6 rounded-xl">
+                            <h3 className="font-semibold text-lg text-amber-700 dark:text-amber-500 mb-3">Revision Strategy</h3>
+                            <p className="text-foreground leading-relaxed">{result.revisionSchedule}</p>
+                          </div>
+
+                          <div className="space-y-4">
+                            <h3 className="font-semibold text-lg border-b pb-2">Practice Tasks</h3>
+                            <ul className="list-disc pl-5 space-y-2">
+                              {result.practiceTasks?.map((task: string, idx: number) => (
+                                <li key={idx} className="text-sm text-foreground">{task}</li>
+                              ))}
+                            </ul>
+                          </div>
+
+                          <div className="space-y-4">
+                            <h3 className="font-semibold text-lg border-b pb-2">Review Checkpoints</h3>
+                            <ul className="list-disc pl-5 space-y-2">
+                              {result.reviewCheckpoints?.map((cp: string, idx: number) => (
+                                <li key={idx} className="text-sm text-foreground">{cp}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        </div>
+                      </TabsContent>
+                    </div>
+                  </Tabs>
+                </div>
+              ) : null}
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>

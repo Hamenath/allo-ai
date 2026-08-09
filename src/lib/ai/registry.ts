@@ -226,31 +226,31 @@ export const StudyPlannerInputSchema = z.object({
   goal: z.string().min(10).max(500),
   currentLevel: z.enum(["Beginner", "Intermediate", "Advanced", "Expert"]),
   availableHours: z.number().min(1).max(16),
+  daysPerWeek: z.number().min(1).max(7),
   deadline: z.string().min(2).max(100),
   learningStyle: z.enum(["Visual", "Auditory", "Reading/Writing", "Kinesthetic", "Mixed"]),
   topics: z.string().max(1000).optional(),
+  currentStrengths: z.string().max(1000).optional(),
+  currentWeaknesses: z.string().max(1000).optional(),
+  examName: z.string().max(200).optional(),
+  examDate: z.string().max(100).optional(),
+  existingResources: z.string().max(1000).optional(),
 });
 
 export const StudyPlannerOutputSchema = z.object({
   overallStrategy: z.string().describe("High-level summary of how to approach studying this subject"),
-  dailySchedule: z.array(
+  weeklyGoals: z.array(z.string()).describe("Goals to achieve on a weekly basis"),
+  dailyTasks: z.array(
     z.object({
-      timeBlock: z.string(),
-      activity: z.string(),
-      focus: z.string(),
+      day: z.string(),
+      tasks: z.array(z.string()),
     })
-  ),
-  weeklyGoals: z.array(z.string()),
-  topicsBreakdown: z.array(
-    z.object({
-      topic: z.string(),
-      difficulty: z.string(),
-      estimatedHours: z.number(),
-    })
-  ),
-  revisionSchedule: z.string(),
-  practiceTasks: z.array(z.string()),
-  progressChecklist: z.array(z.string()),
+  ).describe("Daily task breakdown for a typical week"),
+  topicSequence: z.array(z.string()).describe("Logical sequence of topics to cover"),
+  revisionSchedule: z.string().describe("Strategy and schedule for revision"),
+  practiceTasks: z.array(z.string()).describe("Suggested practical exercises or tasks"),
+  reviewCheckpoints: z.array(z.string()).describe("Milestones to check progress"),
+  progressChecklist: z.array(z.string()).describe("A flat checklist of all major items to complete"),
 });
 
 const StudyPlannerPrompt = (input: z.infer<typeof StudyPlannerInputSchema>) => `
@@ -261,15 +261,21 @@ Subject: ${input.subject}
 Goal: ${input.goal}
 Current Level: ${input.currentLevel}
 Available Hours per Day: ${input.availableHours}
+Days Available per Week: ${input.daysPerWeek}
 Deadline/Timeframe: ${input.deadline}
 Learning Style: ${input.learningStyle}
 Specific Topics to Cover: ${input.topics || "Not provided"}
+Current Strengths: ${input.currentStrengths || "Not provided"}
+Current Weaknesses: ${input.currentWeaknesses || "Not provided"}
+Exam Name: ${input.examName || "Not provided"}
+Exam Date: ${input.examDate || "Not provided"}
+Existing Resources: ${input.existingResources || "Not provided"}
 
 Rules:
-1. Create a realistic and actionable daily and weekly routine.
-2. Tailor the suggested activities to the user's learning style.
-3. Do not invent specific external links/books unless explicitly asked, but you can suggest general resource types.
-4. Ensure the total estimated hours in topics Breakdown makes sense with their daily availability.
+1. Create a realistic and actionable daily and weekly routine considering days and hours available.
+2. Address their weaknesses and utilize their strengths.
+3. If the user asks for resources but none are provided, suggest general resource TYPES or categories, without pretending specific links or facts have been verified.
+4. Ensure tasks in "progressChecklist" are actionable items they can check off.
 5. Return ONLY valid JSON matching the schema.
 `;
 
@@ -573,6 +579,48 @@ Rules:
 `;
 
 // --------------------------------------------------------
+// 13. MEETING SUMMARIZER
+// --------------------------------------------------------
+
+export const MeetingSummarizerInputSchema = z.object({
+  title: z.string().min(2).max(200),
+  date: z.string().max(100).optional(),
+  transcript: z.string().min(10).max(25000),
+});
+
+export const MeetingSummarizerOutputSchema = z.object({
+  summary: z.string().describe("High-level summary of the meeting"),
+  keyPoints: z.array(z.string()).describe("Key discussion points"),
+  decisions: z.array(z.string()).describe("Any decisions made"),
+  actionItems: z.array(
+    z.object({
+      task: z.string(),
+      owner: z.string().optional().describe("Owner of the task, if explicitly identifiable"),
+      deadline: z.string().optional().describe("Deadline, if explicitly identifiable"),
+    })
+  ).describe("Action items with optional owners and deadlines"),
+  openQuestions: z.array(z.string()).describe("Unresolved questions"),
+  followUps: z.array(z.string()).describe("Next steps or follow-ups"),
+});
+
+const MeetingSummarizerPrompt = (input: z.infer<typeof MeetingSummarizerInputSchema>) => `
+You are an expert executive assistant.
+Summarize the following meeting transcript/notes into a highly structured format.
+
+Meeting Title: ${input.title}
+Meeting Date: ${input.date || "Not provided"}
+
+TRANSCRIPT / NOTES:
+${input.transcript}
+
+Rules:
+1. Extract clear, concise key points.
+2. For action items, ONLY extract owners and deadlines if they are clearly stated in the text. Do NOT invent or guess them. If not specified, leave them empty or omit them.
+3. Do NOT invent attendees, decisions, or facts that were not in the transcript.
+4. Return ONLY valid JSON matching the schema.
+`;
+
+// --------------------------------------------------------
 // REGISTRY EXPORT
 // --------------------------------------------------------
 
@@ -635,7 +683,7 @@ export const toolsRegistry: Record<string, AITool> = {
   "study-planner": {
     id: "study-planner",
     name: "Study Planner",
-    category: "CAREER", // Instructions put this in Career category list
+    category: "LEARNING",
     description: "Create personalized study plans and schedules.",
     icon: "GraduationCap",
     inputSchema: StudyPlannerInputSchema,
@@ -707,6 +755,17 @@ export const toolsRegistry: Record<string, AITool> = {
     inputSchema: BugReportInputSchema,
     outputSchema: BugReportOutputSchema,
     systemPrompt: BugReportPrompt,
+    planRequirement: "FREE",
+  },
+  "meeting-summarizer": {
+    id: "meeting-summarizer",
+    name: "Meeting Summarizer",
+    category: "PRODUCTIVITY",
+    description: "Convert chaotic meeting transcripts into structured summaries.",
+    icon: "Users",
+    inputSchema: MeetingSummarizerInputSchema,
+    outputSchema: MeetingSummarizerOutputSchema,
+    systemPrompt: MeetingSummarizerPrompt,
     planRequirement: "FREE",
   },
 };
