@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { BlackHoleHeroSection } from "@/components/ui/blackhole-hero-section";
+import { SmoothScroll } from "@/components/smooth-scroll";
 import Link from "next/link";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -23,17 +24,6 @@ function useNarrow(query = "(max-width: 767px)") {
   return narrow;
 }
 
-/**
- * A hero built around the picture rather than laid on top of it.
- *
- * The hole is pushed off centre with `focus`, so the busy half and the reading
- * half never overlap, and `scrim` darkens only the edge the copy sits on. A
- * flat overlay could not do that without greying the halo as well.
- *
- * A phone has no room to stand the two side by side, so there the whole thing
- * turns through 90°: hole low, copy high, veil from the top — and the ray
- * count drops, because a phone pays for every step.
- */
 export default function BlackHoleHeroSectionDemo() {
   const narrow = useNarrow();
   const sectionRef = useRef<HTMLElement | null>(null);
@@ -49,14 +39,14 @@ export default function BlackHoleHeroSectionDemo() {
       // Intro entrance timeline
       gsap.fromTo(
         [headingRef.current, textRef.current, ctaRef.current].filter(Boolean),
-        { opacity: 0, y: 30 },
+        { opacity: 0, y: 25 },
         {
           opacity: 1,
           y: 0,
-          duration: 1,
-          stagger: 0.18,
-          ease: "power3.out",
-          delay: 0.15,
+          duration: 0.8,
+          stagger: 0.15,
+          ease: "power2.out",
+          delay: 0.1,
         }
       );
 
@@ -65,12 +55,13 @@ export default function BlackHoleHeroSectionDemo() {
         scrollTrigger: {
           trigger: sectionRef.current,
           start: "top top",
-          end: "bottom top",
-          scrub: 0.8,
+          end: "bottom 30%",
+          scrub: true,
+          fastScrollEnd: true,
         },
-        y: -70,
+        y: -40,
         opacity: 0.2,
-        ease: "none",
+        ease: "power1.inOut",
       });
     }, sectionRef);
 
@@ -78,62 +69,60 @@ export default function BlackHoleHeroSectionDemo() {
   }, []);
 
   return (
-    <section ref={sectionRef} className="relative min-h-[92svh] w-full md:min-h-180">
-      <BlackHoleHeroSection
-        // A phone has no room to stand the art beside the copy, so the
-        // arrangement turns through 90°: copy at the top under a veil, the
-        // hole low and whole in the bottom third. Not pushed off the edge —
-        // half a hole reads as a mistake, and the empty middle it leaves reads
-        // as a bug. A wider field makes up the room the narrow frame lost.
-        focus={narrow ? [0.5, 0.76] : [0.72, 0.46]}
-        scrim={narrow ? "top" : "left"}
-        scrimStrength={0.9}
-        distance={24}
-        elevation={narrow ? -7 : -5.5}
-        fov={narrow ? 58 : 42}
-        glow={narrow ? 0.85 : 1}
-        steps={narrow ? 200 : 300}
-        resolution={narrow ? 0.6 : 0.7}
-      >
-        <div
-          ref={contentRef}
-          className="flex h-full min-h-[92svh] items-start px-6 pt-14 sm:px-10 md:min-h-180 md:items-center md:pt-0 lg:px-20"
+    <SmoothScroll>
+      <section ref={sectionRef} className="relative min-h-[92svh] w-full md:min-h-180">
+        <BlackHoleHeroSection
+          focus={narrow ? [0.5, 0.76] : [0.72, 0.46]}
+          scrim={narrow ? "top" : "left"}
+          scrimStrength={0.9}
+          distance={24}
+          elevation={narrow ? -7 : -5.5}
+          fov={narrow ? 58 : 42}
+          glow={narrow ? 0.75 : 0.9}
+          steps={narrow ? 120 : 160}
+          resolution={narrow ? 0.5 : 0.6}
+          maxDpr={1.25}
         >
-          <div className="max-w-136">
-            <h1
-              ref={headingRef}
-              className="text-[2.5rem] font-light leading-[1.05] tracking-[-0.03em] text-white sm:text-6xl lg:text-[4.25rem]"
-            >
-              Light does not
-              <br />
-              leave here
-            </h1>
-
-            <p
-              ref={textRef}
-              className="mt-6 max-w-md text-[0.95rem] leading-relaxed text-white/60 md:mt-7"
-            >
-              The ring above the shadow is the far side of the disc, bent over
-              the top. Nothing put it there but gravity.
-            </p>
-
-            <div ref={ctaRef} className="mt-8 flex flex-wrap items-center gap-3 md:mt-10">
-              <Link
-                href="/signup"
-                className="rounded-full bg-white px-6 py-3 text-sm font-medium text-black transition hover:bg-white/90"
+          <div
+            ref={contentRef}
+            className="flex h-full min-h-[92svh] items-start px-6 pt-14 sm:px-10 md:min-h-180 md:items-center md:pt-0 lg:px-20 transform-gpu"
+          >
+            <div className="max-w-136">
+              <h1
+                ref={headingRef}
+                className="text-[2.5rem] font-light leading-[1.05] tracking-[-0.03em] text-white sm:text-6xl lg:text-[4.25rem]"
               >
-                Get started
-              </Link>
-              <Link
-                href="/"
-                className="rounded-full border border-white/20 bg-white/5 px-6 py-3 text-sm font-medium text-white transition hover:bg-white/10"
+                Light does not
+                <br />
+                leave here
+              </h1>
+
+              <p
+                ref={textRef}
+                className="mt-6 max-w-md text-[0.95rem] leading-relaxed text-white/60 md:mt-7"
               >
-                Back to Home
-              </Link>
+                The ring above the shadow is the far side of the disc, bent over
+                the top. Nothing put it there but gravity.
+              </p>
+
+              <div ref={ctaRef} className="mt-8 flex flex-wrap items-center gap-3 md:mt-10">
+                <Link
+                  href="/signup"
+                  className="rounded-full bg-white px-6 py-3 text-sm font-medium text-black transition hover:bg-white/90"
+                >
+                  Get started
+                </Link>
+                <Link
+                  href="/"
+                  className="rounded-full border border-white/20 bg-white/5 px-6 py-3 text-sm font-medium text-white transition hover:bg-white/10"
+                >
+                  Back to Home
+                </Link>
+              </div>
             </div>
           </div>
-        </div>
-      </BlackHoleHeroSection>
-    </section>
+        </BlackHoleHeroSection>
+      </section>
+    </SmoothScroll>
   );
 }

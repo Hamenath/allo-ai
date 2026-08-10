@@ -632,9 +632,9 @@ export function BlackHoleHeroSection({
   glow = 1,
   exposure = 0.9,
   vignette = 0.28,
-  steps = 300,
-  resolution = 0.7,
-  maxDpr = 1.75,
+  steps = 180,
+  resolution = 0.6,
+  maxDpr = 1.35,
   focus = [0.72, 0.46],
   scrim = "none",
   scrimStrength = 0.9,
@@ -1169,11 +1169,11 @@ export function BlackHoleHeroSection({
   return (
     <div
       ref={hostRef}
-      className={`relative isolate h-full w-full overflow-hidden bg-black ${className}`}
+      className={`relative isolate h-full w-full overflow-hidden bg-black transform-gpu ${className}`}
       {...rest}
     >
-      <canvas ref={canvasRef} aria-hidden="true" className="absolute inset-0 h-full w-full" />
-      {children ? <div className="relative z-10 h-full w-full">{children}</div> : null}
+      <canvas ref={canvasRef} aria-hidden="true" className="absolute inset-0 h-full w-full transform-gpu pointer-events-none" />
+      {children ? <div className="relative z-10 h-full w-full transform-gpu">{children}</div> : null}
     </div>
   );
 }

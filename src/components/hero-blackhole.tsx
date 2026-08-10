@@ -37,7 +37,7 @@ export function HeroBlackHole() {
     if (!sectionRef.current || !contentRef.current) return;
 
     const ctx = gsap.context(() => {
-      // Intro Stagger Animation
+      // Fast, non-blocking entrance animation
       const targets = [
         badgeRef.current,
         headingRef.current,
@@ -47,28 +47,29 @@ export function HeroBlackHole() {
 
       gsap.fromTo(
         targets,
-        { opacity: 0, y: 35 },
+        { opacity: 0, y: 25 },
         {
           opacity: 1,
           y: 0,
-          duration: 1,
-          stagger: 0.15,
-          ease: "power3.out",
-          delay: 0.2,
+          duration: 0.8,
+          stagger: 0.12,
+          ease: "power2.out",
+          delay: 0.1,
         }
       );
 
-      // Smooth ScrollTrigger Parallax & Fade on Scroll
+      // Lightweight non-scrub fade on scroll for zero scroll drag
       gsap.to(contentRef.current, {
         scrollTrigger: {
           trigger: sectionRef.current,
           start: "top top",
-          end: "bottom top",
-          scrub: 0.8,
+          end: "bottom 30%",
+          scrub: true,
+          fastScrollEnd: true,
         },
-        y: -80,
-        opacity: 0.15,
-        ease: "none",
+        opacity: 0.2,
+        y: -40,
+        ease: "power1.inOut",
       });
     }, sectionRef);
 
@@ -84,13 +85,14 @@ export function HeroBlackHole() {
         distance={24}
         elevation={narrow ? -7 : -5.5}
         fov={narrow ? 58 : 42}
-        glow={narrow ? 0.85 : 1}
-        steps={narrow ? 200 : 300}
-        resolution={narrow ? 0.6 : 0.7}
+        glow={narrow ? 0.75 : 0.9}
+        steps={narrow ? 120 : 160}
+        resolution={narrow ? 0.5 : 0.6}
+        maxDpr={1.25}
       >
         <div
           ref={contentRef}
-          className="flex h-full min-h-[85vh] items-center px-6 py-16 sm:px-10 md:min-h-175 lg:px-20"
+          className="flex h-full min-h-[85vh] items-center px-6 py-16 sm:px-10 md:min-h-175 lg:px-20 transform-gpu"
         >
           <div className="max-w-xl">
             <div
