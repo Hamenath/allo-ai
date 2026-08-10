@@ -4,10 +4,11 @@ import {
   applicationDefault,
   cert,
   type Credential,
+  type GoogleOAuthAccessToken,
 } from "firebase-admin/app";
 import { getFirestore } from "firebase-admin/firestore";
 import { getAuth } from "firebase-admin/auth";
-import { ExternalAccountClient } from "google-auth-library";
+import { ExternalAccountClient, type BaseExternalAccountClient } from "google-auth-library";
 import { getVercelOidcToken } from "@vercel/oidc";
 
 const PROJECT_ID =
@@ -15,8 +16,80 @@ const PROJECT_ID =
   process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID ||
   "allo-ai-798fe";
 
+// Retrieve internal ApplicationDefaultCredential class reference for inheritance
+const ApplicationDefaultCredentialClass = applicationDefault().constructor as new (
+  ...args: any[]
+) => Credential;
+
+class WifAdminCredential extends ApplicationDefaultCredentialClass implements Credential {
+  private wifAuthClient: BaseExternalAccountClient;
+
+  constructor(authClient: BaseExternalAccountClient) {
+    super();
+    this.wifAuthClient = authClient;
+    // Set internal authClient so firebase-admin SDK helpers operate seamlessly
+    (this as any).authClient = authClient;
+  }
+
+  async getAccessToken(): Promise<GoogleOAuthAccessToken> {
+    const result = await this.wifAuthClient.getAccessToken();
+
+    if (!result.token) {
+      throw new Error(
+        "Google Workload Identity Federation returned no access token."
+      );
+    }
+
+    return {
+      access_token: result.token,
+      expires_in: 3600,
+    };
+  }
+}
+
+function createWifCredential(): Credential {
+  const projectNumber = process.env.GCP_PROJECT_NUMBER;
+  const poolId = process.env.GCP_WORKLOAD_IDENTITY_POOL_ID;
+  const providerId =
+    process.env.GCP_WORKLOAD_IDENTITY_PROVIDER_ID ||
+    process.env.GCP_WORKLOAD_IDENTITY_POOL_PROVIDER_ID;
+  const serviceAccountEmail = process.env.GCP_SERVICE_ACCOUNT_EMAIL;
+
+  if (!projectNumber || !poolId || !providerId || !serviceAccountEmail) {
+    throw new Error(
+      "Missing Google Cloud Workload Identity Federation environment variables."
+    );
+  }
+
+  const audience = `//iam.googleapis.com/projects/${projectNumber}/locations/global/workloadIdentityPools/${poolId}/providers/${providerId}`;
+
+  const authClient = ExternalAccountClient.fromJSON({
+    type: "external_account",
+    audience,
+    subject_token_type: "urn:ietf:params:oauth:token-type:jwt",
+    token_url: "https://sts.googleapis.com/v1/token",
+    service_account_impersonation_url: `https://iamcredentials.googleapis.com/v1/projects/-/serviceAccounts/${serviceAccountEmail}:generateAccessToken`,
+    subject_token_supplier: {
+      getSubjectToken: async () => {
+        if (process.env.VERCEL_OIDC_TOKEN) {
+          return process.env.VERCEL_OIDC_TOKEN;
+        }
+        return await getVercelOidcToken();
+      },
+    },
+  });
+
+  if (!authClient) {
+    throw new Error(
+      "Failed to initialize Google ExternalAccountClient for Workload Identity Federation."
+    );
+  }
+
+  return new WifAdminCredential(authClient);
+}
+
 function createAdminCredential(): Credential {
-  // 1. Explicit Service Account Key (Legacy/Local dev fallback if key provided)
+  // 1. Explicit Private Key (Local dev fallback if key provided)
   if (process.env.FIREBASE_ADMIN_PRIVATE_KEY) {
     return cert({
       projectId: PROJECT_ID,
@@ -28,44 +101,16 @@ function createAdminCredential(): Credential {
     });
   }
 
-  // 2. Application Default Credential (satisfies Firebase Admin & Firestore SDK checks)
-  const cred = applicationDefault();
-
-  const projectNumber = process.env.GCP_PROJECT_NUMBER;
-  const poolId = process.env.GCP_WORKLOAD_IDENTITY_POOL_ID;
-  const providerId =
-    process.env.GCP_WORKLOAD_IDENTITY_PROVIDER_ID ||
-    process.env.GCP_WORKLOAD_IDENTITY_POOL_PROVIDER_ID;
-  const serviceAccountEmail = process.env.GCP_SERVICE_ACCOUNT_EMAIL;
-
-  // On Vercel (or when WIF env vars exist), attach ExternalAccountClient to ApplicationDefaultCredential
-  if (projectNumber && poolId && providerId && serviceAccountEmail) {
-    const audience = `//iam.googleapis.com/projects/${projectNumber}/locations/global/workloadIdentityPools/${poolId}/providers/${providerId}`;
-
-    const authClient = ExternalAccountClient.fromJSON({
-      type: "external_account",
-      audience,
-      subject_token_type: "urn:ietf:params:oauth:token-type:jwt",
-      token_url: "https://sts.googleapis.com/v1/token",
-      service_account_impersonation_url: `https://iamcredentials.googleapis.com/v1/projects/-/serviceAccounts/${serviceAccountEmail}:generateAccessToken`,
-      subject_token_supplier: {
-        getSubjectToken: async () => {
-          if (process.env.VERCEL_OIDC_TOKEN) {
-            return process.env.VERCEL_OIDC_TOKEN;
-          }
-          return await getVercelOidcToken();
-        },
-      },
-    });
-
-    if (authClient) {
-      (cred as any).authClient = authClient;
-    }
+  // 2. Local development fallback (ADC) when VERCEL environment is absent
+  if (!process.env.VERCEL) {
+    return applicationDefault();
   }
 
-  return cred;
+  // 3. Vercel production: Vercel OIDC -> Google WIF -> Service Account
+  return createWifCredential();
 }
 
+// Singleton initialization pattern
 if (!getApps().length) {
   try {
     initializeApp({
@@ -77,7 +122,8 @@ if (!getApps().length) {
   }
 }
 
-const adminDb = getApps().length ? getFirestore() : null;
-const adminAuth = getApps().length ? getAuth() : null;
+const adminApp = getApps().length ? getApps()[0] : null;
+const adminDb = adminApp ? getFirestore(adminApp) : null;
+const adminAuth = adminApp ? getAuth(adminApp) : null;
 
 export { adminDb, adminAuth };
