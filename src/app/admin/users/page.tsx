@@ -2,25 +2,33 @@
 
 import { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, Users, Shield, ShieldOff, Eye, Loader2 } from "lucide-react";
+import { Search, Users, Shield, ShieldOff, Eye, Loader2, AlertCircle } from "lucide-react";
 import Link from "next/link";
 
 export default function AdminUsersPage() {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const [users, setUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [planFilter, setPlanFilter] = useState("ALL");
   const [updatingId, setUpdatingId] = useState<string | null>(null);
 
   async function loadUsers() {
-    if (!user) return;
+    if (authLoading) return;
+    if (!user) {
+      setLoading(false);
+      setFetchError("Authentication required to view users.");
+      return;
+    }
+
     setLoading(true);
+    setFetchError(null);
     try {
       const token = await user.getIdToken();
       const params = new URLSearchParams();
@@ -28,26 +36,33 @@ export default function AdminUsersPage() {
       if (planFilter !== "ALL") params.set("plan", planFilter);
 
       const res = await fetch(`/api/admin/users?${params.toString()}`, {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
       });
       const json = await res.json();
       if (json.success) {
         setUsers(json.data.users || []);
+      } else {
+        setFetchError(json.error?.message || "Failed to load user list");
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error("Failed to fetch users:", err);
+      setFetchError(err.message || "Network error fetching users");
     } finally {
       setLoading(false);
     }
   }
 
   useEffect(() => {
+    if (authLoading) return;
     const timer = setTimeout(() => {
       loadUsers();
     }, 300);
     return () => clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user, searchTerm, planFilter]);
+  }, [user, authLoading, searchTerm, planFilter]);
 
   const handleToggleStatus = async (targetUserId: string, currentDisabled: boolean) => {
     if (!user) return;
@@ -112,9 +127,17 @@ export default function AdminUsersPage() {
 
       <Card className="bg-slate-900 border-slate-800 text-white">
         <CardContent className="p-0">
-          {loading ? (
+          {loading || authLoading ? (
             <div className="flex items-center justify-center py-16">
               <Loader2 className="h-8 w-8 animate-spin text-indigo-500" />
+            </div>
+          ) : fetchError ? (
+            <div className="py-12 text-center text-slate-400">
+              <AlertCircle className="h-10 w-10 text-rose-500 mx-auto mb-3" />
+              <p className="text-rose-400 font-medium mb-1">{fetchError}</p>
+              <Button variant="outline" size="sm" onClick={loadUsers} className="mt-3 border-slate-800">
+                Retry Loading
+              </Button>
             </div>
           ) : users.length > 0 ? (
             <div className="divide-y divide-slate-800 overflow-x-auto">

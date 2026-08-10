@@ -2,34 +2,54 @@
 
 import { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ShieldAlert, Loader2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { ShieldAlert, Loader2, AlertCircle } from "lucide-react";
 import { format } from "date-fns";
 
 export default function AdminAuditLogPage() {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const [logs, setLogs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState<string | null>(null);
+
+  async function loadLogs() {
+    if (authLoading) return;
+    if (!user) {
+      setLoading(false);
+      setFetchError("Authentication required.");
+      return;
+    }
+
+    setLoading(true);
+    setFetchError(null);
+    try {
+      const token = await user.getIdToken();
+      const res = await fetch("/api/admin/audit-log", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+      const json = await res.json();
+      if (json.success) {
+        setLogs(json.data.logs || []);
+      } else {
+        setFetchError(json.error?.message || "Failed to fetch audit log");
+      }
+    } catch (err: any) {
+      console.error("Failed to load audit logs:", err);
+      setFetchError(err.message || "Network error fetching audit logs");
+    } finally {
+      setLoading(false);
+    }
+  }
 
   useEffect(() => {
-    async function loadLogs() {
-      if (!user) return;
-      try {
-        const token = await user.getIdToken();
-        const res = await fetch("/api/admin/audit-log", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        const json = await res.json();
-        if (json.success) setLogs(json.data.logs || []);
-      } catch (err) {
-        console.error("Failed to load audit logs:", err);
-      } finally {
-        setLoading(false);
-      }
-    }
     loadLogs();
-  }, [user]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, authLoading]);
 
   return (
     <div className="space-y-6">
@@ -45,9 +65,17 @@ export default function AdminAuditLogPage() {
           </CardTitle>
         </CardHeader>
         <CardContent className="p-0">
-          {loading ? (
+          {loading || authLoading ? (
             <div className="flex items-center justify-center py-16">
               <Loader2 className="h-8 w-8 animate-spin text-indigo-500" />
+            </div>
+          ) : fetchError ? (
+            <div className="py-12 text-center text-slate-400">
+              <AlertCircle className="h-10 w-10 text-rose-500 mx-auto mb-3" />
+              <p className="text-rose-400 font-medium mb-1">{fetchError}</p>
+              <Button variant="outline" size="sm" onClick={loadLogs} className="mt-3 border-slate-800">
+                Retry Loading
+              </Button>
             </div>
           ) : logs.length > 0 ? (
             <div className="divide-y divide-slate-800 overflow-x-auto">
