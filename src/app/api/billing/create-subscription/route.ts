@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { adminAuth } from "@/lib/firebase-admin";
+import { adminAuth } from "@/lib/firebase-admin-auth";
 import { getPlanConfig, PlanType } from "@/lib/billing/plans";
 import { getRazorpayClient, isRazorpayConfigured } from "@/lib/billing/razorpay";
 

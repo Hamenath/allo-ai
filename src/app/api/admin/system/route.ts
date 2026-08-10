@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { verifyAdminUser } from "@/lib/admin/auth";
-import { adminDb, adminAuth } from "@/lib/firebase-admin";
+import { adminDb } from "@/lib/firebase-admin-firestore";
+import { adminAuth } from "@/lib/firebase-admin-auth";
 import { isRazorpayConfigured } from "@/lib/billing/razorpay";
 
 export async function GET(req: Request) {

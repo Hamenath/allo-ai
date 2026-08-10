@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { adminAuth, adminDb } from "@/lib/firebase-admin";
+import { adminDb } from "@/lib/firebase-admin-firestore";
 
 export interface AdminAuthResult {
   isAuthorized: boolean;
@@ -26,6 +26,8 @@ export async function verifyAdminUser(req: Request): Promise<AdminAuthResult> {
     }
 
     const token = authHeader.split("Bearer ")[1];
+    const { adminAuth } = await import("@/lib/firebase-admin-auth");
+
     if (!adminAuth) {
       return {
         isAuthorized: false,
@@ -62,7 +64,6 @@ export async function verifyAdminUser(req: Request): Promise<AdminAuthResult> {
       }
     }
 
-    // Fallback: If no admin user is defined in DB, treat first logged in user as admin for dev testing if ADMIN_ALLOW_ALL is set, or deny.
     return {
       isAuthorized: false,
       errorResponse: NextResponse.json(

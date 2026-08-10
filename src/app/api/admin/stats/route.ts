@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { verifyAdminUser } from "@/lib/admin/auth";
-import { adminDb } from "@/lib/firebase-admin";
+import { adminDb } from "@/lib/firebase-admin-firestore";
 import { toolsRegistry } from "@/lib/ai/registry";
 import { isRazorpayConfigured } from "@/lib/billing/razorpay";
 

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { adminAuth } from "@/lib/firebase-admin";
+import { adminAuth } from "@/lib/firebase-admin-auth";
 import { toolsRegistry } from "@/lib/ai/registry";
 import { generateStructuredOutput } from "@/lib/ai/gemini";
 import { checkUsage, incrementUsage, saveServerGeneration } from "@/lib/db/usage";
