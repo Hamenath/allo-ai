@@ -12,6 +12,8 @@ import { getVercelOidcToken } from "@vercel/oidc";
 
 const PROJECT_ID =
   process.env.GCP_PROJECT_ID ||
+  process.env.FIREBASE_PROJECT_ID ||
+  process.env.FIREBASE_ADMIN_PROJECT_ID ||
   process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID ||
   "allo-ai-798fe";
 
@@ -87,15 +89,18 @@ function createWifCredential(): Credential {
 }
 
 function createAdminCredential(): Credential {
-  // 1. Explicit Private Key (Local dev fallback if key provided)
-  if (process.env.FIREBASE_ADMIN_PRIVATE_KEY) {
+  const privateKey = process.env.FIREBASE_ADMIN_PRIVATE_KEY || process.env.FIREBASE_PRIVATE_KEY;
+  const clientEmail =
+    process.env.FIREBASE_ADMIN_CLIENT_EMAIL ||
+    process.env.FIREBASE_CLIENT_EMAIL ||
+    process.env.GCP_SERVICE_ACCOUNT_EMAIL;
+
+  // 1. Explicit Service Account Key (if provided in environment variables)
+  if (privateKey && clientEmail) {
     return cert({
       projectId: PROJECT_ID,
-      clientEmail:
-        process.env.FIREBASE_ADMIN_CLIENT_EMAIL ||
-        process.env.GCP_SERVICE_ACCOUNT_EMAIL ||
-        "",
-      privateKey: process.env.FIREBASE_ADMIN_PRIVATE_KEY.replace(/\\n/g, "\n"),
+      clientEmail: clientEmail,
+      privateKey: privateKey.replace(/\\n/g, "\n"),
     });
   }
 
