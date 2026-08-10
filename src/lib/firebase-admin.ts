@@ -1,11 +1,11 @@
-import { getApps, initializeApp, cert, Credential } from "firebase-admin/app";
+import { getApps, initializeApp, cert, applicationDefault, Credential } from "firebase-admin/app";
 import { getFirestore } from "firebase-admin/firestore";
 import { getAuth } from "firebase-admin/auth";
 import { ExternalAccountClient } from "google-auth-library";
 import { getVercelOidcToken } from "@vercel/oidc";
 
-function getCredential(): Credential | undefined {
-  // 1. Private Key (Legacy / local env fallback if explicitly provided)
+function createAdminCredential(): Credential {
+  // 1. Explicit Service Account Key (Legacy/Local dev fallback if key provided)
   if (process.env.FIREBASE_ADMIN_PRIVATE_KEY) {
     return cert({
       projectId:
@@ -22,6 +22,7 @@ function getCredential(): Credential | undefined {
   }
 
   // 2. Keyless Workload Identity Federation (Vercel OIDC -> GCP WIF)
+  const cred = applicationDefault();
   const gcpProjectNumber = process.env.GCP_PROJECT_NUMBER;
   const poolId = process.env.GCP_WORKLOAD_IDENTITY_POOL_ID;
   const providerId =
@@ -49,22 +50,14 @@ function getCredential(): Credential | undefined {
     });
 
     if (authClient) {
-      return {
-        getAccessToken: async () => {
-          const res = await authClient.getAccessToken();
-          return {
-            access_token: res.token || "",
-            expires_in: 3600,
-          };
-        },
-      };
+      (cred as any).authClient = authClient;
     }
   }
 
-  return undefined;
+  return cred;
 }
 
-// Create a singleton initialization pattern to avoid repeated initialization during development
+// Singleton initialization pattern
 if (!getApps().length) {
   try {
     const projectId =
@@ -73,10 +66,8 @@ if (!getApps().length) {
       process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID ||
       "allo-ai-798fe";
 
-    const credential = getCredential();
-
     initializeApp({
-      ...(credential ? { credential } : {}),
+      credential: createAdminCredential(),
       projectId,
     });
   } catch (error) {
