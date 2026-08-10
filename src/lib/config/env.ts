@@ -32,9 +32,8 @@ export function validateEnvironment(isProduction = process.env.NODE_ENV === "pro
       "RAZORPAY_KEY_ID",
       "RAZORPAY_KEY_SECRET",
       "RAZORPAY_WEBHOOK_SECRET",
-      "FIREBASE_ADMIN_PROJECT_ID",
-      "FIREBASE_ADMIN_CLIENT_EMAIL",
-      "FIREBASE_ADMIN_PRIVATE_KEY",
+      "GCP_PROJECT_ID",
+      "GCP_SERVICE_ACCOUNT_EMAIL",
     ];
 
     for (const key of requiredServer) {
